@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const schemaLogin = z.object({
-  email: z.string().email({ message: "El email no es válido" }),
+  identificador: z
+    .string()
+    .min(3, {
+      message: "El identificador debe tener por lo menos 3 caracteres",
+    }),
   password: z
     .string()
     .min(6, { message: "La contraseña debe tener por lo menos 6 caracteres" })

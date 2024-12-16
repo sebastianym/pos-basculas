@@ -3,7 +3,6 @@
 import { loginService } from "@/data/services/auth/loginService";
 import { config } from "@/lib/config/auth/cookieConfig";
 import { schemaLogin } from "@/lib/schemas/schemaLogin";
-import { error } from "console";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,13 +11,13 @@ export const loginAction = async (prevState: any, formData: FormData) => {
 
   try {
     const validatedFields = schemaLogin.safeParse({
-      email: formData.get("email"),
+      identificador: formData.get("identificador"),
       password: formData.get("password"),
     });
 
     if (
       !validatedFields.success ||
-      !validatedFields.data.email ||
+      !validatedFields.data.identificador ||
       !validatedFields.data.password
     ) {
       return {
@@ -30,7 +29,7 @@ export const loginAction = async (prevState: any, formData: FormData) => {
     }
 
     const responseData = await loginService({
-      email: validatedFields.data.email,
+      identificador: validatedFields.data.identificador,
       password: validatedFields.data.password,
     });
 
@@ -53,9 +52,8 @@ export const loginAction = async (prevState: any, formData: FormData) => {
 
     if (responseData.jwt) {
       cookies().set("jwt", responseData.jwt, config);
-      redirectPath = `/cliente`;
+      redirectPath = `/dashboard/compraMaterial`;
     }
-
   } catch (error) {
     console.error("Login action error:", error);
     throw error;

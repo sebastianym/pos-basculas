@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NextUIProvider } from "@nextui-org/react";
 import { ViewTransitions } from "next-view-transitions";
+import { PortProvider } from "@/components/context/PortContext";
 import "../assets/globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en">
         <body>
-          <NextUIProvider>{children}</NextUIProvider>
+          <NextUIProvider>
+            <PortProvider>{children}</PortProvider>
+          </NextUIProvider>
         </body>
       </html>
     </ViewTransitions>

@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  apellido      String
+  identificador String   @unique
+  contrasena    String
+  rol           Rol
+  ventas        Venta[]
+  compras       Compra[]
+}
+
+enum Rol {
+  ADMIN
+  USER
+}
+
+model Proveedor {
+  id              Int      @id @default(autoincrement())
+  nombreProveedor String
+  direccion       String
+  telefono        String
+  correo          String
+  NIT             String   @unique
+  compras         Compra[]
+}
+
+model CompaniaCliente {
+  id        Int     @id @default(autoincrement())
+  nombre    String
+  direccion String
+  telefono  String
+  correo    String
+  NIT       String  @unique
+  ventas    Venta[]
+}
+
+model Material {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  codigo      String   @unique
+  precioPorKg Float
+  ventas      Venta[]
+  compras     Compra[]
+}
+
+model Venta {
+  id                Int              @id @default(autoincrement())
+  valorVenta        Float
+  fecha             DateTime
+  hora              DateTime
+  material          Material         @relation(fields: [materialId], references: [id])
+  materialId        Int
+  usuario           Usuario          @relation(fields: [usuarioId], references: [id])
+  usuarioId         Int
+  companiaCliente   CompaniaCliente? @relation(fields: [companiaClienteId], references: [id])
+  companiaClienteId Int?
+}
+
+model Compra {
+  id          Int       @id @default(autoincrement())
+  valorCompra Float
+  fecha       DateTime
+  hora        DateTime
+  material    Material  @relation(fields: [materialId], references: [id])
+  materialId  Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId   Int
+  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
+  proveedorId Int
+}

@@ -6,7 +6,7 @@ import prisma from "@/lib/config/prisma";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json();
+  const { identificador, password } = await request.json();
 
   if (!JWT_SECRET) {
     return NextResponse.json(
@@ -16,23 +16,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      // include: {
-      //     academy: true,
-      //     client: {
-      //         include: {
-      //             academies: {
-      //                 include: {
-      //                     academy: true,
-      //                 },
-      //             },
-      //         },
-      //     },
-      //     admin: true,
-      //     employee: true,
-      //     instructor: true,
-      // },
+    const user = await prisma.usuario.findUnique({
+      where: { identificador },
     });
 
     if (!user) {
@@ -42,7 +27,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.contrasena);
 
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -51,18 +36,18 @@ export async function POST(request: Request) {
       );
     }
 
-    let academyId;
     let token;
 
-    token = jwt.sign({ id: user.id, role: user.role, academyId }, JWT_SECRET, {
+    token = jwt.sign({ id: user.id, role: user.rol }, JWT_SECRET, {
       expiresIn: "1d",
     });
 
     const userData = {
       id: user.id,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      identificador: user.identificador,
+      rol: user.rol,
     };
 
     return NextResponse.json({ jwt: token, user: userData });

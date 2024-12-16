@@ -1,53 +1,98 @@
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchGET } from "@/data/services/fetchGET";
 
-function DashboardCompras() {
+function TablaCompras() {
+  const [compras, setCompras] = useState<any>([]);
+
+  async function loadCompras() {
+    const data = await fetchGET({
+      url: "/api/compras/all",
+      error: "Error al obtener los compras",
+    });
+    setCompras(data);
+  }
+
+  useEffect(() => {
+    loadCompras();
+  }, []);
+
+  const handleActualizar = (id: number) => {
+    console.log(`Actualizar registro con ID: ${id}`);
+  };
+
+  const handleEliminar = (id: number) => {
+    console.log(`Eliminar registro con ID: ${id}`);
+  };
+
   return (
-    <main className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight text-[#1a47b8]">
-          Administrador de Compras
-        </h2>
+    <div>
+      <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
+        <h1 className="text-3xl font-bold m-8 text-center">Tabla de Compras</h1>
+        <Button>Exportar excel</Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-medium">
-              Mostrar todas las Compras
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base text-muted-foreground">
-              En esta sección podrás ver las compras que registró la plataforma
-              y filtrar por una busqueda especifica.
-            </p>
-            <Button className="mt-4 w-full bg-[#1a47b8]" size="lg">
-              Ir a Compras
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-medium">
-              Exportar Compras
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base text-muted-foreground">
-              En esta sección podrás exportar un excel con todas las compras
-              entre un cierto rango.
-            </p>
-            <Button className="mt-4 w-full bg-[#1a47b8]" size="lg">
-              Exportar Excel
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col items-center">
+        <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Material</TableHead>
+                <TableHead>Usuario</TableHead>
+                <TableHead>Proveedor</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Hora</TableHead>
+                <TableHead>Valor</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {compras.map((compra: any) => (
+                <TableRow key={compra.id}>
+                  <TableCell>{compra.material.nombre}</TableCell>
+                  <TableCell>{compra.usuario.identificador}</TableCell>
+                  <TableCell>{compra.proveedor.nombreProveedor}</TableCell>
+                    <TableCell>{new Date(compra.fecha).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(compra.hora).toLocaleTimeString()}</TableCell>
+                  <TableCell>{compra.valorCompra}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleActualizar(compra.id)}
+                        className="px-2 py-1 text-xs"
+                      >
+                        Actualizar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleEliminar(compra.id)}
+                        className="px-2 py-1 text-xs"
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 
-export default DashboardCompras;
+export default TablaCompras;

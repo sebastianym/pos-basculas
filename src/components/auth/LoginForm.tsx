@@ -45,19 +45,19 @@ export default function LoginForm() {
               perfil al sistema.
             </p>
             <form action={formAction}>
-              <label htmlFor="email">
+              <label htmlFor="identificador">
                 <p className="block text-sm font-semibold leading-[18px] text-gray-600 mb-2">
-                  Correo electrónico
+                  Identificador
                 </p>
               </label>
               <input
-                id="email"
+                id="identificador"
                 autoComplete="off"
-                name="email"
-                placeholder="Ingresa tu email aquí"
+                name="identificador"
+                placeholder="Ingresa tu identificador aquí"
                 className="w-full min-w-0 rounded-md  bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-3"
               />
-              <ZodErrors error={formState?.zodErrors?.email} />
+              <ZodErrors error={formState?.zodErrors?.identificador} />
 
               <label htmlFor="password">
                 <p className="block text-sm font-semibold leading-[18px] text-gray-600 mb-2 mt-5">

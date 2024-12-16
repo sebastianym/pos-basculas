@@ -1,53 +1,94 @@
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchGET } from "@/data/services/fetchGET";
 
-function DashboardUsuarios() {
+function TablaUsuarios() {
+  const [usuarios, setUsuarios] = useState<any>([]);
+
+  async function loadUsuarios() {
+    const data = await fetchGET({
+      url: "/api/usuarios/all",
+      error: "Error al obtener los usuarios",
+    });
+    setUsuarios(data);
+  }
+
+  useEffect(() => {
+    loadUsuarios();
+  }, []);
+
+  const handleActualizar = (id: number) => {
+    console.log(`Actualizar registro con ID: ${id}`);
+  };
+
+  const handleEliminar = (id: number) => {
+    console.log(`Eliminar registro con ID: ${id}`);
+  };
+
   return (
-    <main className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight text-[#1a47b8]">
-          Administrador de Usuarios
-        </h2>
+    <div>
+      <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
+        <h1 className="text-3xl font-bold m-8 text-center">
+          Tabla de Usuarios
+        </h1>
+        <Button>+ Crear usuario</Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-medium">
-              Modificar Usuarios
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base text-muted-foreground">
-              En esta sección podrás modificar los usuarios de la plataforma,
-              incluyendo la lista de usuarios, eliminarlos o modificarlos.
-            </p>
-            <Button className="mt-4 w-full bg-[#1a47b8]" size="lg">
-              Ir a Usuarios
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-medium">
-              Creación de Usuarios
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-base text-muted-foreground">
-              En esta sección podrás crear nuevos usuarios para la plataforma a
-              partir de un formulario.
-            </p>
-            <Button className="mt-4 w-full bg-[#1a47b8]" size="lg">
-              Ir a Crear
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col items-center">
+        <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Apellido</TableHead>
+                <TableHead>Identificador</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {usuarios.map((usuario: any) => (
+                <TableRow key={usuario.id}>
+                  <TableCell>{usuario.nombre}</TableCell>
+                  <TableCell>{usuario.apellido}</TableCell>
+                  <TableCell>{usuario.identificador}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleActualizar(usuario.id)}
+                        className="px-2 py-1 text-xs"
+                      >
+                        Actualizar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleEliminar(usuario.id)}
+                        className="px-2 py-1 text-xs"
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 
-export default DashboardUsuarios;
+export default TablaUsuarios;

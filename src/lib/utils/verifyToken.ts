@@ -6,8 +6,6 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 interface DecodedToken {
     id: string;
     role?: string;
-    academyId?: number;
-    type: 'user' | 'client';
 }
 
 // Función para verificar y decodificar el token
@@ -24,7 +22,7 @@ export function verifyToken(authHeader?: string): DecodedToken | null {
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload & DecodedToken;
-        if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'EMPLOYEE' || decoded.role === 'INSTRUCTOR' || decoded.role === 'CLIENT')) {
+        if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'USER')) {
             return decoded;
         }
         return null;
