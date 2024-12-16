@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
+import { printTicketCompra } from "@/lib/functions/print";
 
 function ServicioForm() {
   const {
@@ -14,21 +16,46 @@ function ServicioForm() {
     isConnected,
     connectSerial,
   } = usePort();
+
+  interface Pesaje {
+    id: number;
+    material: string;
+    peso: number;
+  }
+
+  const [pesajes, setPesajes] = useState<Pesaje[]>([]);
+  const [processed, setProcessed] = useState(false);
+
+  const handleProcessPesaje = (e: any) => {
+    e.preventDefault();
+    const nuevoPesaje = {
+      id: Date.now(),
+      material: e.target.material.value,
+      peso: Number(output),
+    };
+    setPesajes([...pesajes, nuevoPesaje]);
+    setProcessed(true);
+    successAlert(
+      "Pesaje procesado",
+      "El pesaje se ha procesado correctamente",
+      "success"
+    );
+    setOutput("");
+  };
+
+  const handlePrintTicket = () => {
+    printTicketCompra("16/12/2024", "10:00", pesajes);
+    setPesajes([]);
+    setProcessed(false);
+    setOutput("");
+  };
+
+  const handleRemovePesaje = (id: any) => {
+    setPesajes(pesajes.filter((pesaje) => pesaje.id !== id));
+  };
+
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Procesar la compra
-        successAlert(
-          "Pesaje procesado",
-          "El pesaje se ha procesado correctamente",
-          "success"
-        );
-        disconnectSerial();
-        setOutput("");
-      }}
-    >
+    <form className="space-y-4" onSubmit={handleProcessPesaje}>
       <div className="flex justify-end mb-4">
         {!isConnected ? (
           <Button
@@ -57,7 +84,12 @@ function ServicioForm() {
         >
           Material
         </label>
-        <Select placeholder="Seleccione un material" label="">
+        <Select
+          id="material"
+          name="material"
+          placeholder="Seleccione un material"
+          label=""
+        >
           <SelectItem key="1" value="Papel">
             Papel
           </SelectItem>
@@ -111,6 +143,7 @@ function ServicioForm() {
             onClick={() => port && readData(port)}
             className="disabled:cursor-not-allowed disabled:opacity-70"
             disabled={!isConnected}
+            type="button"
           >
             Pesar
           </Button>
@@ -124,6 +157,40 @@ function ServicioForm() {
       >
         Procesar pesaje
       </Button>
+
+      <Button
+        type="button"
+        onClick={handlePrintTicket}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium disabled:cursor-not-allowed disabled:opacity-70 mt-2"
+        disabled={!processed}
+      >
+        Imprimir Ticket
+      </Button>
+
+      <div className="mt-4 space-y-2">
+        <h3 className="text-lg font-medium">Pesajes Procesados</h3>
+        {pesajes.length === 0 ? (
+          <p>No hay pesajes procesados.</p>
+        ) : (
+          <ul className="space-y-2">
+            {pesajes.map((pesaje) => (
+              <li
+                key={pesaje.id}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <span>{`Material: ${pesaje.material}, Peso: ${pesaje.peso}kg`}</span>
+                <Button
+                  color="danger"
+                  variant="ghost"
+                  onClick={() => handleRemovePesaje(pesaje.id)}
+                >
+                  Eliminar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </form>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
@@ -15,21 +16,42 @@ function CompraForm() {
     isConnected,
     connectSerial,
   } = usePort();
+
+  const [compras, setCompras] = useState<Array<{ id: number; material: string; peso: number; precioPorKg: number; precioTotal: number }>>([]);
+  const [processed, setProcessed] = useState(false);
+
+  const handleProcessCompra = (e: any) => {
+    e.preventDefault();
+    const nuevaCompra = {
+      id: Date.now(),
+      material: e.target.material.value,
+      peso: Number(output),
+      precioPorKg: 5000, // Esto podría ajustarse dinámicamente
+      precioTotal: Number(output) * 5000,
+    };
+    setCompras([...compras, nuevaCompra]);
+    setProcessed(true);
+    successAlert(
+      "Compra procesada",
+      "La compra se ha procesado correctamente",
+      "success"
+    );
+    setOutput("");
+  };
+
+  const handlePrintTicket = () => {
+    printTicketCompra("15/12/2024", "8:41", compras);
+    setCompras([]);
+    setProcessed(false);
+    setOutput("");
+  };
+
+  const handleRemoveCompra = (id: any) => {
+    setCompras(compras.filter((compra) => compra.id !== id));
+  };
+
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Procesar la compra
-        successAlert(
-          "Compra procesada",
-          "La compra se ha procesado correctamente",
-          "success"
-        );
-        printTicketCompra("15/12/2024", "8:41", output);
-        setOutput("");
-      }}
-    >
+    <form className="space-y-4" onSubmit={handleProcessCompra}>
       <div className="flex justify-end mb-4">
         {!isConnected ? (
           <Button
@@ -54,11 +76,25 @@ function CompraForm() {
       <div className="space-y-2">
         <label
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          htmlFor="proveedor"
+        >
+          Proveedor
+        </label>
+        <Select id="proveedor" name="proveedor" placeholder="Seleccione un proveedor" label="">
+          <SelectItem key="1" value="proveedor1">
+            Vidriosss
+          </SelectItem>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <label
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           htmlFor="material"
         >
           Material
         </label>
-        <Select placeholder="Seleccione un material" label="">
+        <Select id="material" name="material" placeholder="Seleccione un material" label="">
           <SelectItem key="1" value="Papel">
             Papel
           </SelectItem>
@@ -131,8 +167,8 @@ function CompraForm() {
           type="number"
           label=""
           placeholder="Ingrese el precio por kg"
-          value={"precioPorKg.toString()"}
-          isReadOnly
+          value={"5000"}
+          readOnly
         />
       </div>
 
@@ -160,6 +196,40 @@ function CompraForm() {
       >
         Procesar Compra
       </Button>
+
+      <Button
+        type="button"
+        onClick={handlePrintTicket}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium disabled:cursor-not-allowed disabled:opacity-70 mt-2"
+        disabled={!processed}
+      >
+        Imprimir Ticket
+      </Button>
+
+      <div className="mt-4 space-y-2">
+        <h3 className="text-lg font-medium">Compras Procesadas</h3>
+        {compras.length === 0 ? (
+          <p>No hay compras procesadas.</p>
+        ) : (
+          <ul className="space-y-2">
+            {compras.map((compra) => (
+              <li
+                key={compra.id}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <span>{`Material: ${compra.material}, Peso: ${compra.peso}kg, Total: $${compra.precioTotal}`}</span>
+                <Button
+                  color="danger"
+                  variant="ghost"
+                  onClick={() => handleRemoveCompra(compra.id)}
+                >
+                  Eliminar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </form>
   );
 }

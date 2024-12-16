@@ -49,10 +49,14 @@ export const loginAction = async (prevState: any, formData: FormData) => {
         message: "Error al iniciar sesión.",
       };
     }
-
+    console.log("responseData", responseData);
     if (responseData.jwt) {
       cookies().set("jwt", responseData.jwt, config);
-      redirectPath = `/dashboard/compraMaterial`;
+      if (responseData.data.role === "ADMIN") {
+        redirectPath = `/administrador/usuarios`;
+      } else {
+        redirectPath = `/dashboard/compraMaterial`;
+      }
     }
   } catch (error) {
     console.error("Login action error:", error);

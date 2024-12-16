@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
+import { printTicketCompra } from "@/lib/functions/print";
 
 function VentaForm() {
   const {
@@ -14,21 +16,50 @@ function VentaForm() {
     isConnected,
     connectSerial,
   } = usePort();
+
+  interface Venta {
+    id: number;
+    material: string;
+    peso: number;
+    precioPorKg: number;
+    precioTotal: number;
+  }
+
+  const [ventas, setVentas] = useState<Venta[]>([]);
+  const [processed, setProcessed] = useState(false);
+
+  const handleProcessVenta = (e: any) => {
+    e.preventDefault();
+    const nuevaVenta = {
+      id: Date.now(),
+      material: e.target.material.value,
+      peso: Number(output),
+      precioPorKg: 5000, // Esto podría ajustarse dinámicamente
+      precioTotal: Number(output) * 5000,
+    };
+    setVentas([...ventas, nuevaVenta]);
+    setProcessed(true);
+    successAlert(
+      "Venta procesada",
+      "La venta se ha procesado correctamente",
+      "success"
+    );
+    setOutput("");
+  };
+
+  const handlePrintTicket = () => {
+    printTicketCompra("15/12/2024", "8:41", ventas);
+    setVentas([]);
+    setProcessed(false);
+    setOutput("");
+  };
+
+  const handleRemoveVenta = (id: any) => {
+    setVentas(ventas.filter((venta) => venta.id !== id));
+  };
+
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Procesar la venta
-        successAlert(
-          "Venta procesada",
-          "La venta se ha procesado correctamente",
-          "success"
-        );
-        disconnectSerial();
-        setOutput("");
-      }}
-    >
+    <form className="space-y-4" onSubmit={handleProcessVenta}>
       <div className="flex justify-end mb-4">
         {!isConnected ? (
           <Button
@@ -53,11 +84,35 @@ function VentaForm() {
       <div className="space-y-2">
         <label
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          htmlFor="cliente"
+        >
+          Cliente
+        </label>
+        <Select
+          id="cliente"
+          name="cliente"
+          placeholder="Seleccione un cliente"
+          label=""
+        >
+          <SelectItem key="1" value="cliente1">
+            cliente 1
+          </SelectItem>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <label
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           htmlFor="material"
         >
           Material
         </label>
-        <Select placeholder="Seleccione un material" label="">
+        <Select
+          id="material"
+          name="material"
+          placeholder="Seleccione un material"
+          label=""
+        >
           <SelectItem key="1" value="Papel">
             Papel
           </SelectItem>
@@ -130,8 +185,8 @@ function VentaForm() {
           type="number"
           label=""
           placeholder="Ingrese el precio por kg"
-          value={"precioPorKg.toString()"}
-          isReadOnly
+          value={"5000"}
+          readOnly
         />
       </div>
 
@@ -159,6 +214,40 @@ function VentaForm() {
       >
         Procesar Venta
       </Button>
+
+      <Button
+        type="button"
+        onClick={handlePrintTicket}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium disabled:cursor-not-allowed disabled:opacity-70 mt-2"
+        disabled={!processed}
+      >
+        Imprimir Ticket
+      </Button>
+
+      <div className="mt-4 space-y-2">
+        <h3 className="text-lg font-medium">Ventas Procesadas</h3>
+        {ventas.length === 0 ? (
+          <p>No hay ventas procesadas.</p>
+        ) : (
+          <ul className="space-y-2">
+            {ventas.map((venta) => (
+              <li
+                key={venta.id}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <span>{`Material: ${venta.material}, Peso: ${venta.peso}kg, Total: $${venta.precioTotal}`}</span>
+                <Button
+                  color="danger"
+                  variant="ghost"
+                  onClick={() => handleRemoveVenta(venta.id)}
+                >
+                  Eliminar
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </form>
   );
 }
