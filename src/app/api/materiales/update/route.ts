@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { id, nombre, codigo, precioPorKg } = await request.json();
+    const { id, nombre, precioPorKg } = await request.json();
 
     const updateMaterial = await prisma.material.update({
       where: {
@@ -27,7 +27,6 @@ export async function POST(request: Request) {
       },
       data: {
         nombre,
-        codigo,
         precioPorKg,
       },
     });

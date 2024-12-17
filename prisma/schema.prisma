@@ -46,7 +46,6 @@ model CompaniaCliente {
 model Material {
   id          Int      @id @default(autoincrement())
   nombre      String
-  codigo      String   @unique
   precioPorKg Float
   ventas      Venta[]
   compras     Compra[]

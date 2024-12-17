@@ -14,11 +14,15 @@ import { fetchGET } from "@/data/services/fetchGET";
 import { fetchPOST } from "@/data/services/fetchPOST";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
+import CreateMaterialModal from "@/components/modals/materiales/createMaterialModal";
+import UpdateMaterialModal from "@/components/modals/materiales/updateMaterialModal";
 
 function TablaMateriales() {
   const [materiales, setMateriales] = useState<any>([]);
   const [updateTable, setUpdateTable] = useState(false);
-
+  const [isModalCreateOpen, setModalCreateOpen] = useState(false);
+  const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
+  const [materialSelected, setMaterialSelected] = useState<any>(undefined);
   async function loadMateriales() {
     const data = await fetchGET({
       url: "/api/materiales/all",
@@ -30,10 +34,6 @@ function TablaMateriales() {
   useEffect(() => {
     loadMateriales();
   }, [updateTable]);
-
-  const handleActualizar = (id: number) => {
-    console.log(`Actualizar registro con ID: ${id}`);
-  };
 
   async function handleEliminar(id: number) {
     const data = await fetchPOST({
@@ -49,21 +49,56 @@ function TablaMateriales() {
     }
   }
 
+  const handleModalCreateClose = () => {
+    setModalCreateOpen(false);
+  };
+
+  const handleModalCreateOpen = () => {
+    setModalCreateOpen(true);
+  };
+
+  const handleModalUpdateClose = () => {
+    setModalUpdateOpen(false);
+  };
+
+  const handleModalUpdateOpen = () => {
+    setModalUpdateOpen(true);
+  };
+
   return (
     <div>
+      <CreateMaterialModal
+        handleModalClose={handleModalCreateClose}
+        isModalOpen={isModalCreateOpen}
+        updateTable={updateTable}
+        setUpdateTable={setUpdateTable}
+      />
+      <UpdateMaterialModal
+        handleModalClose={handleModalUpdateClose}
+        isModalOpen={isModalUpdateOpen}
+        material={materialSelected}
+        updateTable={updateTable}
+        setUpdateTable={setUpdateTable}
+      />
       <div className="flex flex-col items-center">
         <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
           <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
             Tabla de Materiales
           </h1>
-          <Button className="bg-[#1a47b8]">+ Crear material</Button>
+          <Button
+            className="bg-[#1a47b8]"
+            onClick={() => {
+              handleModalCreateOpen();
+            }}
+          >
+            + Crear material
+          </Button>
         </div>
         <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Codigo</TableHead>
                 <TableHead>Precio por Kg</TableHead>
                 <TableHead>Acciones</TableHead>
               </TableRow>
@@ -73,14 +108,16 @@ function TablaMateriales() {
                 materiales.map((material: any) => (
                   <TableRow key={material.id}>
                     <TableCell>{material.nombre}</TableCell>
-                    <TableCell>{material.codigo}</TableCell>
                     <TableCell>{material.precioPorKg}</TableCell>
                     <TableCell>
                       <div className="flex justify-start space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleActualizar(material.id)}
+                          onClick={() => {
+                            setMaterialSelected(material);
+                            handleModalUpdateOpen();
+                          }}
                           className="px-2 py-1 text-xs"
                         >
                           Actualizar
@@ -110,7 +147,7 @@ function TablaMateriales() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center">
+                  <TableCell colSpan={3} className="text-center">
                     No hay materiales registrados
                   </TableCell>
                 </TableRow>

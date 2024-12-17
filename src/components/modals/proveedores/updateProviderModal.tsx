@@ -92,7 +92,7 @@ function UpdateProviderModal({
           <div className="bg-background rounded-lg w-full max-w-md p-6 relative">
             <div className="flex justify-between items-center pb-2">
               <h2 className="text-xl text-black font-semibold">
-                Editar Cliente
+                Editar Proveedor
               </h2>
             </div>
             <div className="mt-4">
@@ -111,7 +111,7 @@ function UpdateProviderModal({
                     value={nombre}
                     autoComplete="off"
                     name="nombre"
-                    placeholder="Ingresa el nombre del cliente"
+                    placeholder="Ingresa el nombre del proveedor"
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.nombre} />
@@ -130,7 +130,7 @@ function UpdateProviderModal({
                     value={direccion}
                     autoComplete="off"
                     name="direccion"
-                    placeholder="Ingresa la dirección del cliente"
+                    placeholder="Ingresa la dirección del proveedor"
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.direccion} />
@@ -149,7 +149,7 @@ function UpdateProviderModal({
                     value={telefono}
                     autoComplete="off"
                     name="telefono"
-                    placeholder="Ingresa el teléfono del cliente"
+                    placeholder="Ingresa el teléfono del proveedor"
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.telefono} />
@@ -168,7 +168,7 @@ function UpdateProviderModal({
                     value={correo}
                     autoComplete="off"
                     name="correo"
-                    placeholder="Ingresa el correo del cliente"
+                    placeholder="Ingresa el correo del proveedor"
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.correo} />
@@ -187,7 +187,7 @@ function UpdateProviderModal({
                     value={nit}
                     autoComplete="off"
                     name="NIT"
-                    placeholder="Ingresa el NIT del cliente"
+                    placeholder="Ingresa el NIT del proveedor"
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.NIT} />

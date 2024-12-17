@@ -18,12 +18,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { nombre, codigo, precioPorKg } = await request.json();
+    const { nombre, precioPorKg } = await request.json();
 
     const nuevoMaterial = await prisma.material.create({
       data: {
         nombre,
-        codigo,
         precioPorKg,
       },
     });

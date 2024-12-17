@@ -1,27 +1,21 @@
 "use server";
 import { fetchPOST } from "@/data/services/fetchPOST";
-import { schemaProvider } from "@/lib/schemas/schemaProvider";
+import { schemaMaterial } from "@/lib/schemas/schemaMaterial";
 
-export default async function updateProviderAction(
+export default async function updateMaterialAction(
   prevState: any,
   formData: FormData
 ) {
   try {
-    const validatedFields = schemaProvider.safeParse({
+    const validatedFields = schemaMaterial.safeParse({
       id: formData.get("id"),
-      nombreProveedor: formData.get("nombre"),
-      direccion: formData.get("direccion"),
-      telefono: formData.get("telefono"),
-      correo: formData.get("correo"),
-      NIT: formData.get("NIT"),
+      nombre: formData.get("nombre"),
+      precioPorKg: Number(formData.get("precioPorKg")),
     });
     if (
       !validatedFields.success ||
-      !validatedFields.data.nombreProveedor ||
-      !validatedFields.data.direccion ||
-      !validatedFields.data.telefono ||
-      !validatedFields.data.correo ||
-      !validatedFields.data.NIT
+      !validatedFields.data.nombre ||
+      !validatedFields.data.precioPorKg
     ) {
       return {
         ...prevState,
@@ -32,9 +26,9 @@ export default async function updateProviderAction(
     }
 
     const responseData = await fetchPOST({
-      url: "/api/proveedores/update",
+      url: "/api/materiales/update",
       body: validatedFields.data,
-      error: "Error al actualizar el proveedor.",
+      error: "Error al actualizar el material.",
     });
 
     if (!responseData) {
@@ -48,15 +42,15 @@ export default async function updateProviderAction(
 
     if (responseData.error) {
       return {
-        apiErrors: "Ocurrio un error al actualizar el proveedor.",
+        apiErrors: "Ocurrio un error al actualizar el material.",
         zodErrors: null,
-        message: "Error al actualizar el proveedor.",
+        message: "Error al actualizar el material.",
       };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Error al actualizar el proveedor:", error);
+    console.error("Error al actualizar el material:", error);
     throw error;
   }
 }

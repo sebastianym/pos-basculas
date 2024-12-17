@@ -81,7 +81,7 @@ function CreateProviderModal({
           <div className="bg-background rounded-lg w-full max-w-md p-6 relative">
             <div className="flex justify-between items-center pb-2">
               <h2 className="text-xl text-black font-semibold">
-                Crear proveedor
+                Crear Proveedor
               </h2>
             </div>
             <div className="mt-4">
