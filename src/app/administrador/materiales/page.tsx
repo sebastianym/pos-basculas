@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,49 +10,54 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-
-interface Persona {
-  id: number;
-  nombre: string;
-  apellido: string;
-  identificador: string;
-}
-
-const datos: Persona[] = Array.from({ length: 100 }, (_, i) => ({
-  id: i + 1,
-  nombre: `Nombre${i + 1}`,
-  apellido: `Apellido${i + 1}`,
-  identificador: `ID-${(i + 1).toString().padStart(3, "0")}`,
-}));
+import { fetchGET } from "@/data/services/fetchGET";
+import { fetchPOST } from "@/data/services/fetchPOST";
+import { successAlert } from "@/lib/utils/alerts/successAlert";
+import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
 
 function TablaMateriales() {
-  const [pagina, setPagina] = useState(1);
-  const porPagina = 10;
-  const totalPaginas = Math.ceil(datos.length / porPagina);
+  const [materiales, setMateriales] = useState<any>([]);
+  const [updateTable, setUpdateTable] = useState(false);
 
-  const datosPaginados = datos.slice(
-    (pagina - 1) * porPagina,
-    pagina * porPagina
-  );
+  async function loadMateriales() {
+    const data = await fetchGET({
+      url: "/api/materiales/all",
+      error: "Error al obtener los materiales",
+    });
+    setMateriales(data);
+  }
+
+  useEffect(() => {
+    loadMateriales();
+  }, [updateTable]);
 
   const handleActualizar = (id: number) => {
     console.log(`Actualizar registro con ID: ${id}`);
   };
 
-  const handleEliminar = (id: number) => {
-    console.log(`Eliminar registro con ID: ${id}`);
-  };
+  async function handleEliminar(id: number) {
+    const data = await fetchPOST({
+      url: "/api/materiales/delete",
+      body: { id },
+      error: "Error al eliminar el material",
+    });
+    if (data.id) {
+      setUpdateTable(!updateTable);
+      successAlert("Éxito", "Material eliminado correctamente", "success");
+    } else {
+      errorAlert("Error", "Error al eliminar el material");
+    }
+  }
 
   return (
     <div>
-      <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
-        <h1 className="text-3xl font-bold m-8 text-center">
-          Tabla de Materiales
-        </h1>
-        <Button>+ Crear material</Button>
-      </div>
-
       <div className="flex flex-col items-center">
+        <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
+          <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+            Tabla de Materiales
+          </h1>
+          <Button className="bg-[#1a47b8]">+ Crear material</Button>
+        </div>
         <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
           <Table>
             <TableHeader>
@@ -64,33 +69,52 @@ function TablaMateriales() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {datosPaginados.map((persona) => (
-                <TableRow key={persona.id}>
-                  <TableCell>{persona.nombre}</TableCell>
-                  <TableCell>{persona.apellido}</TableCell>
-                  <TableCell>{persona.identificador}</TableCell>
-                  <TableCell>
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleActualizar(persona.id)}
-                        className="px-2 py-1 text-xs"
-                      >
-                        Actualizar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleEliminar(persona.id)}
-                        className="px-2 py-1 text-xs"
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
+              {materiales && materiales.length ? (
+                materiales.map((material: any) => (
+                  <TableRow key={material.id}>
+                    <TableCell>{material.nombre}</TableCell>
+                    <TableCell>{material.codigo}</TableCell>
+                    <TableCell>{material.precioPorKg}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-start space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleActualizar(material.id)}
+                          className="px-2 py-1 text-xs"
+                        >
+                          Actualizar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={async () => {
+                            const responseSubmit = confirmAlert(
+                              "Eliminar material",
+                              "¿Estás seguro de eliminar este material?, se eliminaran las compras y ventas asociadas al material"
+                            );
+                            responseSubmit.then((confirmed) => {
+                              if (confirmed) {
+                                console.log(material.id);
+                                handleEliminar(material.id.toString());
+                              }
+                            });
+                          }}
+                          className="px-2 py-1 text-xs"
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    No hay materiales registrados
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </div>

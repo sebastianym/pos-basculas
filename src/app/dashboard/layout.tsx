@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Scale, ShoppingCart, Store } from "lucide-react";
+import { Scale, ShoppingCart, Store } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,19 +10,11 @@ import {
   SidebarMenuButton,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { Link } from 'next-view-transitions'
+import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/components/custom/LogoutButton";
 
 export default function DashboardLayout({
   children,
@@ -30,13 +22,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-gray-100 w-full">
         <Sidebar className="bg-[#1a47b8] text-white">
           <SidebarHeader className="border-b border-white/10 px-4 py-6">
-            <h2 className="text-xl font-bold text-black">ASORESCATAR (user)</h2>
+            <h2 className="text-xl font-bold text-black">
+              ASORESCATAR (USER)
+            </h2>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
@@ -97,35 +90,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="flex items-center justify-end w-full">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-10 w-10 rounded-full"
-                    >
-                      <Avatar>
-                        <AvatarFallback>PY</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-full"
-                    align="center"
-                    forceMount
-                  >
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          Pablo Yepes (usuario)
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-500 font-bold">
-                      Cerrar Sesión
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <LogoutButton/>
               </div>
             </div>
           </header>

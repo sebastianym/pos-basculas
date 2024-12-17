@@ -16,13 +16,13 @@ export function LogoutButton() {
 			console.error("Error during logout", error);
 		}
 
-		router.push("/iniciar-sesion");
+		router.push("/");
 	};
 
 
 	return (
-		<div onClick={handleLogout} className="font-semibold text-sm text-gray-500 rounded-sm hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 nav-link-dashboard">
-			<button type="submit" className="font-semibold text-sm text-gray-500 rounded-sm hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 nav-link-dashboard">
+		<div onClick={handleLogout} className="font-semibold text-sm text-red-500 rounded-sm hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 nav-link-dashboard">
+			<button type="submit" className="font-semibold text-sm text-red-500 rounded-sm hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 nav-link-dashboard">
 				Cerrar sesión
 			</button>
 		</div>

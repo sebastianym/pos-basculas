@@ -37,12 +37,13 @@ function TablaCompras() {
 
   return (
     <div>
-      <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
-        <h1 className="text-3xl font-bold m-8 text-center">Tabla de Compras</h1>
-        <Button>Exportar excel</Button>
-      </div>
-
       <div className="flex flex-col items-center">
+        <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
+          <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+            Tabla de Compras
+          </h1>
+          <Button className="bg-[#1a47b8]">Exportar excel</Button>
+        </div>
         <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
           <Table>
             <TableHeader>
@@ -62,8 +63,12 @@ function TablaCompras() {
                   <TableCell>{compra.material.nombre}</TableCell>
                   <TableCell>{compra.usuario.identificador}</TableCell>
                   <TableCell>{compra.proveedor.nombreProveedor}</TableCell>
-                    <TableCell>{new Date(compra.fecha).toLocaleDateString()}</TableCell>
-                    <TableCell>{new Date(compra.hora).toLocaleTimeString()}</TableCell>
+                  <TableCell>
+                    {new Date(compra.fecha).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(compra.hora).toLocaleTimeString()}
+                  </TableCell>
                   <TableCell>{compra.valorCompra}</TableCell>
                   <TableCell>
                     <div className="flex justify-center space-x-2">

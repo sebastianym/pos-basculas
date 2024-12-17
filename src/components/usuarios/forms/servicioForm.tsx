@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
-import { printTicketCompra } from "@/lib/functions/print";
+import { printTicketServicio } from "@/lib/functions/print";
+import getUserInformationAction from "@/data/actions/user/getUserInformationAction";
+import { fetchGET } from "@/data/services/fetchGET";
 
 function ServicioForm() {
   const {
@@ -25,12 +27,33 @@ function ServicioForm() {
 
   const [pesajes, setPesajes] = useState<Pesaje[]>([]);
   const [processed, setProcessed] = useState(false);
+  const [nombreCompleto, setNombreCompleto] = useState<string>("");
+  const [materiales, setMateriales] = useState<any>([]);
+
+  async function loadMateriales() {
+    const data = await fetchGET({
+      url: "/api/materiales/all",
+      error: "Error al obtener los materiales",
+    });
+    setMateriales(data);
+  }
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getUserInformationAction();
+      console.log(userData);
+      setNombreCompleto(userData.nombre + " " + userData.apellido);
+    };
+    loadMateriales();
+    fetchUser();
+  }, []);
 
   const handleProcessPesaje = (e: any) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
     const nuevoPesaje = {
       id: Date.now(),
-      material: e.target.material.value,
+      material: formData.get("material") as string,
       peso: Number(output),
     };
     setPesajes([...pesajes, nuevoPesaje]);
@@ -44,7 +67,13 @@ function ServicioForm() {
   };
 
   const handlePrintTicket = () => {
-    printTicketCompra("16/12/2024", "10:00", pesajes);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    printTicketServicio(formattedDate, formattedTime, pesajes, nombreCompleto);
     setPesajes([]);
     setProcessed(false);
     setOutput("");
@@ -56,7 +85,7 @@ function ServicioForm() {
 
   return (
     <form className="space-y-4" onSubmit={handleProcessPesaje}>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-start mb-4">
         {!isConnected ? (
           <Button
             color="secondary"
@@ -90,33 +119,11 @@ function ServicioForm() {
           placeholder="Seleccione un material"
           label=""
         >
-          <SelectItem key="1" value="Papel">
-            Papel
-          </SelectItem>
-          <SelectItem key="2" value="Vidrio">
-            Vidrio
-          </SelectItem>
-          <SelectItem key="3" value="Cartón">
-            Cartón
-          </SelectItem>
-          <SelectItem key="4" value="Plástico">
-            Plástico
-          </SelectItem>
-          <SelectItem key="5" value="PET">
-            PET
-          </SelectItem>
-          <SelectItem key="6" value="Aluminio">
-            Aluminio
-          </SelectItem>
-          <SelectItem key="7" value="Acero">
-            Acero
-          </SelectItem>
-          <SelectItem key="8" value="Chatarra">
-            Chatarra
-          </SelectItem>
-          <SelectItem key="9" value="Cobre">
-            Cobre
-          </SelectItem>
+          {materiales.map((material: any) => (
+            <SelectItem key={material.nombre} value={material.nombre}>
+              {material.nombre}
+            </SelectItem>
+          ))}
         </Select>
       </div>
 

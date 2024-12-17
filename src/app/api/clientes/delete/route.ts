@@ -21,10 +21,29 @@ export async function POST(request: Request) {
 
     const { id } = await request.json();
 
-    const clienteEliminado = await prisma.companiaCliente.delete({
-      where: {
-        id: id,
+    // Verificar si la companiaCliente existe
+    const companiaCliente = await prisma.companiaCliente.findUnique({
+      where: { id: Number(id) },
+      include: {
+        ventas: true,
       },
+    });
+
+    if (!companiaCliente) {
+      return NextResponse.json(
+        { message: "No se encontró la compañía cliente" },
+        { status: 404 }
+      );
+    }
+
+    // Eliminar las relaciones (ventas) de la companiaCliente
+    await prisma.venta.deleteMany({
+      where: { companiaClienteId: Number(id) },
+    });
+
+    // Eliminar la companiaCliente
+    const clienteEliminado = await prisma.companiaCliente.delete({
+      where: { id: Number(id) },
     });
 
     return NextResponse.json(clienteEliminado);
@@ -32,14 +51,14 @@ export async function POST(request: Request) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2025") {
         return NextResponse.json(
-          { message: "No se encontró el cliente" },
+          { message: "No se encontró la compañía cliente" },
           { status: 404 }
         );
       }
       return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json(
-      { message: "Error inesperado al eliminar el cliente" },
+      { message: "Error inesperado al eliminar la compañía cliente" },
       { status: 500 }
     );
   }

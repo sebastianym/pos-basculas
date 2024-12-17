@@ -17,7 +17,13 @@ export async function GET(request: Request) {
       );
     }
 
-    const usuarios = await prisma.usuario.findMany();
+    const usuarios = await prisma.usuario.findMany({
+      where: {
+        rol: {
+          not: "ADMIN",
+        },
+      }
+    });
 
     if (!usuarios) {
       return NextResponse.json(usuarios, { status: 404 });

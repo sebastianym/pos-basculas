@@ -20,8 +20,6 @@ export const errorAlert = (title: string, message: string) => {
     text: message,
     icon: "error",
     confirmButtonColor: "hsl(270, 60%, 52%)",
-    background: "hsl(250, 24%, 9%)",
-    color: "#d2d3e0bf",
     allowEnterKey: true,
     confirmButtonText: "De acuerdo",
     padding: "35px",
@@ -64,8 +62,6 @@ export const confirmAlert = async (title: string, message: string) => {
       cancelButtonText: `Cancelar`,
       focusDeny: true,
       confirmButtonColor: "hsl(270, 60%, 52%)",
-      background: "hsl(250, 24%, 9%)",
-      color: "#d2d3e0bf",
       padding: "35px",
       cancelButtonColor: "#e53e3e",
     }).then((result) => {
@@ -100,7 +96,7 @@ export const productForm = async (method: string, product?: string) => {
       }
     },
   });
-  if(name) {
+  if (name) {
     return name;
   }
 };

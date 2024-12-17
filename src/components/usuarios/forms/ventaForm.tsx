@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input, Select, SelectItem } from "@nextui-org/react";
+import { form, Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
-import { printTicketCompra } from "@/lib/functions/print";
+import { printTicketVenta } from "@/lib/functions/print";
+import getUserInformationAction from "@/data/actions/user/getUserInformationAction";
+import { fetchGET } from "@/data/services/fetchGET";
 
 function VentaForm() {
   const {
@@ -27,16 +29,49 @@ function VentaForm() {
 
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [processed, setProcessed] = useState(false);
+  const [cliente, setCliente] = useState("");
+  const [nombreCompleto, setNombreCompleto] = useState<string>("");
+  const [materiales, setMateriales] = useState<any>([]);
+  const [materialSeleccionado, setMaterialSeleccionado] = useState<any>(null);
+  const [clientes, setClientes] = useState<any>([]);
+
+  async function loadClientes() {
+    const data = await fetchGET({
+      url: "/api/clientes/all",
+      error: "Error al obtener los clientes",
+    });
+    setClientes(data);
+  }
+
+  async function loadMateriales() {
+    const data = await fetchGET({
+      url: "/api/materiales/all",
+      error: "Error al obtener los materiales",
+    });
+    setMateriales(data);
+  }
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getUserInformationAction();
+      setNombreCompleto(userData.nombre + " " + userData.apellido);
+    };
+    loadClientes();
+    loadMateriales();
+    fetchUser();
+  }, []);
 
   const handleProcessVenta = (e: any) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
     const nuevaVenta = {
       id: Date.now(),
-      material: e.target.material.value,
+      material: formData.get("material") as string,
       peso: Number(output),
       precioPorKg: 5000, // Esto podría ajustarse dinámicamente
-      precioTotal: Number(output) * 5000,
+      precioTotal: formData.get("precioTotal") as unknown as number,
     };
+    setCliente(formData.get("cliente") as string);
     setVentas([...ventas, nuevaVenta]);
     setProcessed(true);
     successAlert(
@@ -48,7 +83,19 @@ function VentaForm() {
   };
 
   const handlePrintTicket = () => {
-    printTicketCompra("15/12/2024", "8:41", ventas);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    printTicketVenta(
+      formattedDate,
+      formattedTime,
+      ventas,
+      cliente,
+      nombreCompleto
+    );
     setVentas([]);
     setProcessed(false);
     setOutput("");
@@ -60,7 +107,7 @@ function VentaForm() {
 
   return (
     <form className="space-y-4" onSubmit={handleProcessVenta}>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-start mb-4">
         {!isConnected ? (
           <Button
             color="secondary"
@@ -94,9 +141,11 @@ function VentaForm() {
           placeholder="Seleccione un cliente"
           label=""
         >
-          <SelectItem key="1" value="cliente1">
-            cliente 1
-          </SelectItem>
+          {clientes.map((cliente: any) => (
+            <SelectItem key={cliente.nombre} value={cliente.nombre}>
+              {cliente.nombre}
+            </SelectItem>
+          ))}
         </Select>
       </div>
 
@@ -112,34 +161,13 @@ function VentaForm() {
           name="material"
           placeholder="Seleccione un material"
           label=""
+          onChange={(e) => setMaterialSeleccionado(e.target.value)}
         >
-          <SelectItem key="1" value="Papel">
-            Papel
-          </SelectItem>
-          <SelectItem key="2" value="Vidrio">
-            Vidrio
-          </SelectItem>
-          <SelectItem key="3" value="Cartón">
-            Cartón
-          </SelectItem>
-          <SelectItem key="4" value="Plástico">
-            Plástico
-          </SelectItem>
-          <SelectItem key="5" value="PET">
-            PET
-          </SelectItem>
-          <SelectItem key="6" value="Aluminio">
-            Aluminio
-          </SelectItem>
-          <SelectItem key="7" value="Acero">
-            Acero
-          </SelectItem>
-          <SelectItem key="8" value="Chatarra">
-            Chatarra
-          </SelectItem>
-          <SelectItem key="9" value="Cobre">
-            Cobre
-          </SelectItem>
+          {materiales.map((material: any) => (
+            <SelectItem key={material.nombre} value={material.nombre}>
+              {material.nombre}
+            </SelectItem>
+          ))}
         </Select>
       </div>
 
@@ -185,7 +213,11 @@ function VentaForm() {
           type="number"
           label=""
           placeholder="Ingrese el precio por kg"
-          value={"5000"}
+          value={
+            materiales.find(
+              (material: any) => material.nombre === materialSeleccionado
+            )?.precioPorKg || 0
+          }
           readOnly
         />
       </div>
@@ -199,10 +231,16 @@ function VentaForm() {
         </label>
         <Input
           id="precioTotal"
+          name="precioTotal"
           type="number"
           label=""
           placeholder="Precio total"
-          value={(Number(output) * 5000).toString()}
+          value={(
+            Number(output) *
+              materiales.find(
+                (material: any) => material.nombre === materialSeleccionado
+              )?.precioPorKg || 0
+          ).toString()}
           readOnly
         />
       </div>

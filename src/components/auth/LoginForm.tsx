@@ -71,7 +71,7 @@ export default function LoginForm() {
                 placeholder="Ingresa tu contraseña aquí"
                 className="w-full min-w-0 rounded-md  bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10  focus:border-pink-400 text-base leading-6 px-3 py-3"
               />
-              <ZodErrors error={formState.zodErrors?.password} />
+              <ZodErrors error={formState?.zodErrors?.password} />
 
               <div className="flex flex-col mt-8">
                 <SubmitButton
@@ -81,7 +81,7 @@ export default function LoginForm() {
                   color="blue"
                   size="large"
                 />
-                <ApiErrors error={formState.apiErrors} />
+                <ApiErrors error={formState?.apiErrors} />
               </div>
 
               <a className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 hover:text-pink-600 text-gray-600 w-fit mb-2 mt-7 font-medium block">

@@ -21,10 +21,35 @@ export async function POST(request: Request) {
 
     const { id } = await request.json();
 
-    const usuarioEliminado = await prisma.usuario.delete({
-      where: {
-        id: id,
+    // Verificar si el usuario existe
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: Number(id) },
+      include: {
+        ventas: true,
+        compras: true,
       },
+    });
+
+    if (!usuario) {
+      return NextResponse.json(
+        { message: "No se encontró el usuario" },
+        { status: 404 }
+      );
+    }
+
+    // Eliminar las relaciones (ventas y compras) del usuario
+    await prisma.$transaction([
+      prisma.venta.deleteMany({
+        where: { usuarioId: Number(id) },
+      }),
+      prisma.compra.deleteMany({
+        where: { usuarioId: Number(id) },
+      }),
+    ]);
+
+    // Eliminar el usuario
+    const usuarioEliminado = await prisma.usuario.delete({
+      where: { id: Number(id) },
     });
 
     return NextResponse.json(usuarioEliminado);

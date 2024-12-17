@@ -19,9 +19,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { id, nombre, apellido, identificador, contrasena } =
+    const { id, nombre, apellido } =
       await request.json();
-
     const updateUsuario = await prisma.usuario.update({
       where: {
         id: Number(id),
@@ -29,8 +28,6 @@ export async function POST(request: Request) {
       data: {
         nombre,
         apellido,
-        identificador,
-        contrasena,
       },
     });
 

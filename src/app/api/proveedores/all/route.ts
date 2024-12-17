@@ -11,13 +11,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (decoded.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "No tienes permisos para acceder a este recurso" },
-        { status: 403 }
-      );
-    }
-
     const proveedores = await prisma.proveedor.findMany();
 
     if (!proveedores) {

@@ -6,8 +6,6 @@ export const successAlert = async (title: string, text: string, icon: "success" 
         title,
         text,
         icon,
-        background: 'hsl(250, 24%, 9%)',
-        color: '#d2d3e0bf',
         allowEnterKey: true,
         confirmButtonText: "De acuerdo",
         padding: '35px',

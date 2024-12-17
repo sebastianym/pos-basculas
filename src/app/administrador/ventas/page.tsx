@@ -37,12 +37,13 @@ function TablaVentas() {
 
   return (
     <div>
-      <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
-        <h1 className="text-3xl font-bold m-8 text-center">Tabla de Ventas</h1>
-        <Button>Exportar excel</Button>
-      </div>
-
       <div className="flex flex-col items-center">
+        <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
+          <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+            Tabla de Ventas
+          </h1>
+          <Button className="bg-[#1a47b8]">Exportar excel</Button>
+        </div>
         <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
           <Table>
             <TableHeader>
@@ -53,7 +54,6 @@ function TablaVentas() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Hora</TableHead>
                 <TableHead>Valor</TableHead>
-                <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,30 +61,12 @@ function TablaVentas() {
                 <TableRow key={venta.id}>
                   <TableCell>{venta.material.nombre}</TableCell>
                   <TableCell>{venta.usuario.nombre}</TableCell>
-                  <TableCell>{venta.companiaCliente?.nombre || "N/A"}</TableCell>
+                  <TableCell>
+                    {venta.companiaCliente?.nombre || "N/A"}
+                  </TableCell>
                   <TableCell>{venta.fecha}</TableCell>
                   <TableCell>{venta.hora}</TableCell>
                   <TableCell>{venta.valor}</TableCell>
-                  <TableCell>
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleActualizar(venta.id)}
-                        className="px-2 py-1 text-xs"
-                      >
-                        Actualizar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleEliminar(venta.id)}
-                        className="px-2 py-1 text-xs"
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

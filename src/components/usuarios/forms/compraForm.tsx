@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Select, SelectItem } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { printTicketCompra } from "@/lib/functions/print";
+import getUserInformationAction from "@/data/actions/user/getUserInformationAction";
+import { fetchGET } from "@/data/services/fetchGET";
 
 function CompraForm() {
   const {
@@ -17,18 +19,60 @@ function CompraForm() {
     connectSerial,
   } = usePort();
 
-  const [compras, setCompras] = useState<Array<{ id: number; material: string; peso: number; precioPorKg: number; precioTotal: number }>>([]);
+  const [compras, setCompras] = useState<
+    Array<{
+      id: number;
+      material: string;
+      peso: number;
+      precioPorKg: number;
+      precioTotal: number;
+    }>
+  >([]);
   const [processed, setProcessed] = useState(false);
+  const [proveedor, setProveedor] = useState("");
+  const [nombreCompleto, setNombreCompleto] = useState<string>("");
+  const [materiales, setMateriales] = useState<any>([]);
+  const [proveedores, setProveedores] = useState<any>([]);
+  const [materialSeleccionado, setMaterialSeleccionado] = useState<any>(null);
+
+  async function loadProveedores() {
+    const data = await fetchGET({
+      url: "/api/proveedores/all",
+      error: "Error al obtener los proveedores",
+    });
+    setProveedores(data);
+  }
+
+  async function loadMateriales() {
+    const data = await fetchGET({
+      url: "/api/materiales/all",
+      error: "Error al obtener los materiales",
+    });
+    setMateriales(data);
+  }
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getUserInformationAction();
+      console.log(userData);
+      setNombreCompleto(userData.nombre + " " + userData.apellido);
+    };
+    loadProveedores();
+    loadMateriales();
+    fetchUser();
+  }, []);
 
   const handleProcessCompra = (e: any) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
     const nuevaCompra = {
       id: Date.now(),
-      material: e.target.material.value,
+      material: formData.get("material") as string,
       peso: Number(output),
       precioPorKg: 5000, // Esto podría ajustarse dinámicamente
-      precioTotal: Number(output) * 5000,
+      precioTotal: formData.get("precioTotal") as unknown as number,
     };
+    setProveedor(formData.get("proveedor") as string);
     setCompras([...compras, nuevaCompra]);
     setProcessed(true);
     successAlert(
@@ -40,7 +84,19 @@ function CompraForm() {
   };
 
   const handlePrintTicket = () => {
-    printTicketCompra("15/12/2024", "8:41", compras);
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString();
+    const formattedTime = currentDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    printTicketCompra(
+      formattedDate,
+      formattedTime,
+      compras,
+      proveedor,
+      nombreCompleto
+    );
     setCompras([]);
     setProcessed(false);
     setOutput("");
@@ -52,7 +108,7 @@ function CompraForm() {
 
   return (
     <form className="space-y-4" onSubmit={handleProcessCompra}>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-start mb-4">
         {!isConnected ? (
           <Button
             color="secondary"
@@ -80,13 +136,23 @@ function CompraForm() {
         >
           Proveedor
         </label>
-        <Select id="proveedor" name="proveedor" placeholder="Seleccione un proveedor" label="">
-          <SelectItem key="1" value="proveedor1">
-            Vidriosss
-          </SelectItem>
+        <Select
+          id="proveedor"
+          name="proveedor"
+          placeholder="Seleccione un proveedor"
+          label=""
+        >
+          {proveedores.map((proveedor: any) => (
+            <SelectItem
+              key={proveedor.nombreProveedor}
+              value={proveedor.nombreProveedor}
+            >
+              {proveedor.nombreProveedor}
+            </SelectItem>
+          ))}
         </Select>
       </div>
-      
+
       <div className="space-y-2">
         <label
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -94,34 +160,18 @@ function CompraForm() {
         >
           Material
         </label>
-        <Select id="material" name="material" placeholder="Seleccione un material" label="">
-          <SelectItem key="1" value="Papel">
-            Papel
-          </SelectItem>
-          <SelectItem key="2" value="Vidrio">
-            Vidrio
-          </SelectItem>
-          <SelectItem key="3" value="Cartón">
-            Cartón
-          </SelectItem>
-          <SelectItem key="4" value="Plástico">
-            Plástico
-          </SelectItem>
-          <SelectItem key="5" value="PET">
-            PET
-          </SelectItem>
-          <SelectItem key="6" value="Aluminio">
-            Aluminio
-          </SelectItem>
-          <SelectItem key="7" value="Acero">
-            Acero
-          </SelectItem>
-          <SelectItem key="8" value="Chatarra">
-            Chatarra
-          </SelectItem>
-          <SelectItem key="9" value="Cobre">
-            Cobre
-          </SelectItem>
+        <Select
+          id="material"
+          name="material"
+          placeholder="Seleccione un material"
+          label=""
+          onChange={(e) => setMaterialSeleccionado(e.target.value)}
+        >
+          {materiales.map((material: any) => (
+            <SelectItem key={material.nombre} value={material.nombre}>
+              {material.nombre}
+            </SelectItem>
+          ))}
         </Select>
       </div>
 
@@ -167,7 +217,11 @@ function CompraForm() {
           type="number"
           label=""
           placeholder="Ingrese el precio por kg"
-          value={"5000"}
+          value={
+            materiales.find(
+              (material: any) => material.nombre === materialSeleccionado
+            )?.precioPorKg || 0
+          }
           readOnly
         />
       </div>
@@ -181,10 +235,13 @@ function CompraForm() {
         </label>
         <Input
           id="precioTotal"
+          name="precioTotal"
           type="number"
           label=""
           placeholder="Precio total"
-          value={(Number(output) * 5000).toString()}
+          value={(Number(output) * materiales.find(
+            (material: any) => material.nombre === materialSeleccionado
+          )?.precioPorKg || 0).toString()}
           readOnly
         />
       </div>

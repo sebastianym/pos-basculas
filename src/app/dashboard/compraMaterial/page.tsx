@@ -1,8 +1,8 @@
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CompraForm from "@/components/usuarios/forms/compraForm";
 
 function CompraMaterial() {
+  
   return (
     <main className="p-6 w-full bg-gray-100">
       <div className="mx-auto max-w-[2000px]">

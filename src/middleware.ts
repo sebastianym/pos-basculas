@@ -55,28 +55,12 @@ function isAuthorized(path: string, role: string | undefined): boolean {
 export async function middleware(request: NextRequest) {
   const user = await getUserMeLoader();
   const currentPath = request.nextUrl.pathname;
-
   if (user && "data" in user && user.data && user.data.decoded) {
     const role = user.data.decoded.role;
 
     // Si la ruta está restringida y el usuario no está autorizado, redirigir
-    if (
-      currentPath in accessControl &&
-      !isAuthorized(currentPath, role) &&
-      role === "USER"
-    ) {
-      return NextResponse.redirect(
-        new URL("/dashboard/compraMaterial", request.url)
-      );
-    }
-    if (
-      currentPath in accessControl &&
-      !isAuthorized(currentPath, role) &&
-      role === "ADMIN"
-    ) {
-      return NextResponse.redirect(
-        new URL("/administrador/usuarios", request.url)
-      );
+    if (currentPath in accessControl && !isAuthorized(currentPath, role)) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
@@ -89,9 +73,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (currentPath.startsWith("/") && user.ok === true) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  // if (currentPath.startsWith("/") && user.ok === true) {
+  //   return NextResponse.redirect(
+  //     new URL("/dashboard/compraMaterial", request.url)
+  //   );
+  // }
 
   return NextResponse.next();
 }
