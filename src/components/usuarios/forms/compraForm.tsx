@@ -107,12 +107,11 @@ function CompraForm() {
     e.preventDefault();
     try {
       const formData = new FormData(e.currentTarget);
-      const proveedorSeleccionado = formData.get("proveedor") as string;
-      setProveedor(proveedorSeleccionado);
+      const proveedorSeleccionado = proveedor as string;
       const materialSeleccionadoForm = formData.get("material") as string;
       const precioTotalValue = formData.get("precioTotal") as string;
       const pesoValue = output; // Valor obtenido de la báscula
-      console.log(proveedorSeleccionado, materialSeleccionadoForm, pesoValue);
+
       // Validar campos obligatorios
       if (!proveedorSeleccionado || !materialSeleccionadoForm || !pesoValue) {
         successAlert(
@@ -132,6 +131,8 @@ function CompraForm() {
             ?.precioPorKg || 0,
         precioTotal: Number(precioTotalValue),
       };
+
+      setProveedor(proveedorSeleccionado);
       setCompras((prev) => [...prev, nuevaCompra]);
       setProcessed(true);
       successAlert(
