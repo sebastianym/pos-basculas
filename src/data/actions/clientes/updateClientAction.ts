@@ -37,20 +37,17 @@ export default async function updateClienteAction(
       error: "Error al actualizar el cliente.",
     });
 
+    // Si la API responde con un error (por ejemplo, NIT duplicado) lo devolvemos
+    if (responseData?.error) {
+      return {success: false, message: responseData.error};
+    }
+
     if (!responseData) {
       return {
         ...prevState,
         apiErrors: responseData.error,
         zodErrors: null,
         message: "Ocurrió un error. Por favor, intenta de nuevo.",
-      };
-    }
-
-    if (responseData.error) {
-      return {
-        apiErrors: "Ocurrio un error al actualizar el cliente.",
-        zodErrors: null,
-        message: "Error al actualizar el cliente.",
       };
     }
 

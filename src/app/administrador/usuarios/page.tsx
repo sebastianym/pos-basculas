@@ -16,6 +16,7 @@ import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
 import CreateUserModal from "@/components/modals/usuarios/createUserModal";
 import UpdateUserModal from "@/components/modals/usuarios/updateUserModal";
+import { CircularProgress } from "@nextui-org/react";
 
 function TablaUsuarios() {
   const [usuarios, setUsuarios] = useState<any>([]);
@@ -23,12 +24,15 @@ function TablaUsuarios() {
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
   const [usuarioSelected, setUsuarioSelected] = useState<any>(undefined);
+  const [loading, setLoading] = useState(true);
+
   async function loadUsuarios() {
     const data = await fetchGET({
       url: "/api/usuarios/all",
       error: "Error al obtener los usuarios",
     });
     setUsuarios(data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -65,6 +69,14 @@ function TablaUsuarios() {
   const handleModalUpdateOpen = () => {
     setModalUpdateOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>

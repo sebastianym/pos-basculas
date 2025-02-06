@@ -36,6 +36,11 @@ export default async function createClientAction(
       body: validatedFields.data,
       error: "Error al crear el cliente.",
     });
+    
+    // Si la API responde con un error (por ejemplo, NIT duplicado) lo devolvemos
+    if (responseData?.error) {
+      return {success: false, message: responseData.error};
+    }
 
     if (!responseData) {
       return {
@@ -46,17 +51,15 @@ export default async function createClientAction(
       };
     }
 
-    if (responseData.error) {
-      return {
-        apiErrors: "Ocurrio un error al crear el cliente.",
-        zodErrors: null,
-        message: "Error al crear el cliente.",
-      };
-    }
-
+    // Si la creación fue exitosa, retornamos success
     return { success: true };
   } catch (error) {
     console.error("Error al crear el cliente:", error);
-    throw error;
+    return {
+      ...prevState,
+      apiErrors: "Ocurrió un error inesperado.",
+      zodErrors: null,
+      message: "Ocurrió un error inesperado.",
+    };
   }
 }

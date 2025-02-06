@@ -29,58 +29,126 @@ function ServicioForm() {
   const [processed, setProcessed] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState<string>("");
   const [materiales, setMateriales] = useState<any>([]);
+  // Estado controlado para el select de material
+  const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
 
   async function loadMateriales() {
-    const data = await fetchGET({
-      url: "/api/materiales/all",
-      error: "Error al obtener los materiales",
-    });
-    setMateriales(data);
+    try {
+      const data = await fetchGET({
+        url: "/api/materiales/all",
+        error: "Error al obtener los materiales",
+      });
+      setMateriales(data);
+    } catch (error) {
+      console.error(error);
+      successAlert("Error", "No se pudieron cargar los materiales", "error");
+    }
   }
 
   useEffect(() => {
     const fetchUser = async () => {
-      const userData = await getUserInformationAction();
-      console.log(userData);
-      setNombreCompleto(userData.nombre + " " + userData.apellido);
+      try {
+        const userData = await getUserInformationAction();
+        setNombreCompleto(userData.nombre + " " + userData.apellido);
+      } catch (error) {
+        console.error("Error al obtener usuario:", error);
+        successAlert(
+          "Error",
+          "No se pudo obtener la información del usuario",
+          "error"
+        );
+      }
     };
     loadMateriales();
     fetchUser();
   }, []);
 
-  const handleProcessPesaje = (e: any) => {
+  const handleProcessPesaje = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const nuevoPesaje = {
-      id: Date.now(),
-      material: formData.get("material") as string,
-      peso: Number(output),
-    };
-    setPesajes([...pesajes, nuevoPesaje]);
-    setProcessed(true);
-    successAlert(
-      "Pesaje procesado",
-      "El pesaje se ha procesado correctamente",
-      "success"
-    );
-    setOutput("");
+    try {
+      // Validar que se haya seleccionado un material y que exista un peso
+      if (!materialSeleccionado.trim() || !output) {
+        successAlert(
+          "Campos incompletos",
+          "Por favor, seleccione un material y pese el servicio",
+          "error"
+        );
+        return;
+      }
+
+      const nuevoPesaje: Pesaje = {
+        id: Date.now(),
+        material: materialSeleccionado,
+        peso: Number(output),
+      };
+
+      setPesajes((prev) => [...prev, nuevoPesaje]);
+      setProcessed(true);
+      successAlert(
+        "Pesaje procesado",
+        "El pesaje se ha procesado correctamente",
+        "success"
+      );
+
+      // Reiniciar el formulario a su estado inicial
+      e.currentTarget.reset();
+      setMaterialSeleccionado("");
+      setOutput("");
+    } catch (error) {
+      console.error("Error al procesar el pesaje", error);
+      successAlert("Error", "Ocurrió un error al procesar el pesaje", "error");
+    }
   };
+
+  function formatTime(fecha: Date) {
+    let hours = fecha.getHours();
+    const minutes = fecha.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convierte 0 a 12 para la hora en formato 12 horas
+    const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+    return `${hours}:${minutesStr} ${ampm}`;
+  }
 
   const handlePrintTicket = () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString();
-    const formattedTime = currentDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    printTicketServicio(formattedDate, formattedTime, pesajes, nombreCompleto);
-    setPesajes([]);
-    setProcessed(false);
-    setOutput("");
+    try {
+      // Validar que haya pesajes procesados
+      if (pesajes.length === 0) {
+        successAlert(
+          "Sin pesajes",
+          "No hay pesajes procesados para imprimir el ticket",
+          "error"
+        );
+        return;
+      }
+
+      const currentDate = new Date();
+      const formattedDate = currentDate.toLocaleDateString();
+      const formattedTime = formatTime(currentDate);
+
+      printTicketServicio(
+        formattedDate,
+        formattedTime,
+        pesajes,
+        nombreCompleto
+      );
+
+      // Reiniciar estado
+      setPesajes([]);
+      setProcessed(false);
+      setOutput("");
+    } catch (error) {
+      console.error("Error al imprimir ticket:", error);
+      successAlert("Error", "Ocurrió un error al imprimir el ticket", "error");
+    }
   };
 
-  const handleRemovePesaje = (id: any) => {
-    setPesajes(pesajes.filter((pesaje) => pesaje.id !== id));
+  const handleRemovePesaje = (id: number) => {
+    try {
+      setPesajes((prev) => prev.filter((pesaje) => pesaje.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar pesaje:", error);
+      successAlert("Error", "Ocurrió un error al eliminar el pesaje", "error");
+    }
   };
 
   return (
@@ -107,17 +175,15 @@ function ServicioForm() {
       </div>
 
       <div className="space-y-2">
-        <label
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          htmlFor="material"
-        >
+        <label className="text-sm font-medium leading-none" htmlFor="material">
           Material
         </label>
         <Select
           id="material"
           name="material"
           placeholder="Seleccione un material"
-          label=""
+          value={materialSeleccionado}
+          onChange={(e) => setMaterialSeleccionado(e.target.value)}
         >
           {materiales.map((material: any) => (
             <SelectItem key={material.nombre} value={material.nombre}>
@@ -128,17 +194,13 @@ function ServicioForm() {
       </div>
 
       <div className="space-y-2 flex flex-col items-center justify-start">
-        <label
-          className="text-start space-y-2 w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          htmlFor="peso"
-        >
+        <label className="text-sm font-medium w-full" htmlFor="peso">
           Peso (kg)
         </label>
         <div className="flex w-full">
           <Input
             id="peso"
             type="text"
-            label=""
             placeholder="El peso en kg"
             value={output}
             readOnly
@@ -147,7 +209,17 @@ function ServicioForm() {
           <Button
             color="primary"
             variant="ghost"
-            onClick={() => port && readData(port)}
+            onClick={async () => {
+              try {
+                setOutput("");
+                if (port) {
+                  await readData(port);
+                }
+              } catch (error) {
+                console.error("Error al pesar:", error);
+                successAlert("Error", "Ocurrió un error al pesar", "error");
+              }
+            }}
             className="disabled:cursor-not-allowed disabled:opacity-70"
             disabled={!isConnected}
             type="button"
@@ -169,7 +241,7 @@ function ServicioForm() {
         type="button"
         onClick={handlePrintTicket}
         className="w-full bg-green-600 hover:bg-green-700 text-white font-medium disabled:cursor-not-allowed disabled:opacity-70 mt-2"
-        disabled={!processed}
+        disabled={pesajes.length === 0}
       >
         Imprimir Ticket
       </Button>

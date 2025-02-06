@@ -71,6 +71,12 @@ function CreateProviderModal({
       setCorreo("");
       setNit("");
       handleModalClose();
+    } else if (!formState.success && formState.message) {
+      successAlert(
+        "Error",
+        formState.message || "Error al crear el proveedor",
+        "error"
+      );
     }
   }, [formState]);
 

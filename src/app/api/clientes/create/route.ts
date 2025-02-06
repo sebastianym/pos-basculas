@@ -20,6 +20,18 @@ export async function POST(request: Request) {
 
     const { nombre, direccion, telefono, correo, NIT } = await request.json();
 
+    // Comprobar si ya existe un cliente con el mismo NIT
+    const existingClient = await prisma.companiaCliente.findUnique({
+      where: { NIT },
+    });
+
+    if (existingClient) {
+      return NextResponse.json(
+        { error: "El identificador (NIT) ya existe" },
+        { status: 400 }
+      );
+    }
+
     const nuevoCliente = await prisma.companiaCliente.create({
       data: {
         nombre,
@@ -33,13 +45,13 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json(
-        {
-          message: error.message,
-        },
-        {
-          status: 500,
-        }
+        { error: error.message },
+        { status: 500 }
       );
     }
+    return NextResponse.json(
+      { error: "Error desconocido" },
+      { status: 500 }
+    );
   }
 }

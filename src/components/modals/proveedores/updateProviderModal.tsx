@@ -83,6 +83,12 @@ function UpdateProviderModal({
       setCorreo("");
       setNit("");
       handleModalClose();
+    } else if (!formState.success && formState.message) {
+      successAlert(
+        "Error",
+        formState.message || "Error al actualizar el proveedor",
+        "error"
+      );
     }
   }, [formState]);
   return (

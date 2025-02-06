@@ -21,7 +21,8 @@ export default function RootLayout({
           <NextUIProvider>
             <PortProvider>{children}</PortProvider>
           </NextUIProvider>
-        </body>
+          <script src="https://cdn.jsdelivr.net/npm/qz-tray/qz-tray.js"></script>
+          </body>
       </html>
     </ViewTransitions>
   );

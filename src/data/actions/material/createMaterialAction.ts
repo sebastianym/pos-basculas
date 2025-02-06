@@ -11,8 +11,6 @@ export default async function createMaterialAction(
       nombre: formData.get("nombre"),
       precioPorKg: Number(formData.get("precioPorKg")),
     });
-    console.log(validatedFields);
-    console.log(validatedFields.error);
     if (
       !validatedFields.success ||
       !validatedFields.data.nombre ||

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/config/prisma";
 import { verifyToken } from "@/lib/utils/verifyToken";
-import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
@@ -12,40 +11,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (decoded.role !== "ADMIN") {
+    if (decoded.role !== "USER") {
       return NextResponse.json(
         { error: "No tienes permisos para acceder a este recurso" },
         { status: 403 }
       );
     }
 
-    const { nombre, apellido, identificador, contrasena } =
+    const { valorCompra, materialId, usuarioId, proveedorId } =
       await request.json();
-
-    // Comprobar si ya existe un cliente con el mismo Identificador
-    const existingUser = await prisma.usuario.findUnique({
-      where: { identificador },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "El identificador ya existe" },
-        { status: 400 }
-      );
-    }
-    
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
-
-    const nuevoUsuario = await prisma.usuario.create({
+    const nuevaCompra = await prisma.compra.create({
       data: {
-        nombre,
-        apellido,
-        identificador,
-        contrasena: hashedPassword,
-        rol: "USER",
+        valorCompra,
+        hora: new Date(),
+        fecha: new Date(),
+        materialId,
+        usuarioId,
+        proveedorId,
       },
     });
-    return NextResponse.json(nuevoUsuario);
+    return NextResponse.json(nuevaCompra);
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json(

@@ -10,7 +10,7 @@ export const PortContext = createContext<{
   isConnected: boolean;
   setIsConnected: (isConnected: boolean) => void;
   connectSerial: () => void;
-  readData: (port: SerialPort) => void;
+  readData: (port: SerialPort) => Promise<void>;
   disconnectSerial: () => void;
 }>({
   port: null,
@@ -20,7 +20,7 @@ export const PortContext = createContext<{
   isConnected: false,
   setIsConnected: () => {},
   connectSerial: () => {},
-  readData: () => {},
+  readData: async () => {},
   disconnectSerial: () => {},
 });
 
@@ -39,7 +39,6 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
 
   const connectSerial = async () => {
     try {
-      // Solicitar al usuario que seleccione un dispositivo serie
       const selectedPort = await navigator.serial.requestPort();
       await selectedPort.open({
         baudRate: 9600,
@@ -47,11 +46,11 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
         stopBits: 1,
         parity: "none",
       });
-
       setPort(selectedPort);
       setIsConnected(true);
     } catch (error) {
       console.error("Error al conectar:", error);
+      successAlert("Error", "No se pudo conectar al puerto serie", "error");
     }
   };
 
@@ -59,39 +58,30 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const reader = selectedPort.readable.getReader();
       const decoder = new TextDecoder();
-      let buffer = ""; // Almacena temporalmente los datos recibidos
+      let buffer = "";
 
       while (true) {
         const { value, done } = await reader.read();
-        if (done) {
-          // Si el lector se cierra, salimos del bucle
-          break;
-        }
+        if (done) break;
         if (value) {
-          // Decodificar los datos recibidos y agregarlos al buffer
           buffer += decoder.decode(value);
-
-          // Procesar solo la última línea válida
           if (buffer.includes("\n")) {
             const lines = buffer.split("\n");
-            const lastLine = lines.pop()?.trim(); // Extraer la última línea completa
-            buffer = lines.join("\n"); // Mantener el resto no procesado
-
+            const lastLine = lines.pop()?.trim();
+            buffer = lines.join("\n");
             if (lastLine) {
-              // Usar una expresión regular para extraer solo el número
               const match = lastLine.match(/wn(\d+\.\d+)kg/);
               if (match && match[1]) {
-                setOutput(match[1]); // Guardar el valor más reciente
-                break; // Salir del bucle después de una lectura válida
+                setOutput(match[1]);
+                break;
               }
             }
           }
         }
       }
-
-      // Liberar el lector después de la lectura
       reader.releaseLock();
     } catch (error) {
+      console.error("Error al leer datos del puerto:", error);
       successAlert(
         "Error al leer datos",
         "Se perdió la conexión con el puerto serie",
@@ -102,10 +92,20 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const disconnectSerial = async () => {
-    if (port) {
-      await port.close();
-      setPort(null);
-      setIsConnected(false);
+    try {
+      if (port) {
+        await port.close();
+        setPort(null);
+        setIsConnected(false);
+        successAlert(
+          "Desconectado",
+          "La báscula se ha desconectado. Por favor, vuelva a conectarla.",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error al desconectar el puerto:", error);
+      successAlert("Error", "Ocurrió un error al desconectar la báscula", "error");
     }
   };
 

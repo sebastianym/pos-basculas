@@ -16,6 +16,7 @@ import { fetchPOST } from "@/data/services/fetchPOST";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
 import CreateProviderModal from "@/components/modals/proveedores/createProviderModal";
 import UpdateProviderModal from "@/components/modals/proveedores/updateProviderModal";
+import { CircularProgress } from "@nextui-org/react";
 
 function TablaProveedores() {
   const [proveedores, setProveedores] = useState<any>([]);
@@ -23,12 +24,15 @@ function TablaProveedores() {
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
   const [proveedorSelected, setProveedorSelected] = useState<any>(undefined);
+  const [loading, setLoading] = useState(true);
+
   async function loadProveedores() {
     const data = await fetchGET({
       url: "/api/proveedores/all",
       error: "Error al obtener los proveedores",
     });
     setProveedores(data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -68,6 +72,14 @@ function TablaProveedores() {
   const handleModalUpdateOpen = () => {
     setModalUpdateOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -142,7 +154,6 @@ function TablaProveedores() {
                             );
                             responseSubmit.then((confirmed) => {
                               if (confirmed) {
-                                console.log(proveedor.id);
                                 handleEliminar(proveedor.id.toString());
                               }
                             });

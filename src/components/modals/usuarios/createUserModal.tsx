@@ -65,6 +65,12 @@ function CreateProductModal({
       setIdentificadorUsuario("");
       setContrasenaUsuario("");
       handleModalClose();
+    } else if (!formState.success && formState.message) {
+      successAlert(
+        "Error",
+        formState.message || "Error al crear el usuario",
+        "error"
+      );
     }
   }, [formState]);
 

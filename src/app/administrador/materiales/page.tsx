@@ -16,6 +16,7 @@ import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
 import CreateMaterialModal from "@/components/modals/materiales/createMaterialModal";
 import UpdateMaterialModal from "@/components/modals/materiales/updateMaterialModal";
+import { CircularProgress } from "@nextui-org/react";
 
 function TablaMateriales() {
   const [materiales, setMateriales] = useState<any>([]);
@@ -23,12 +24,14 @@ function TablaMateriales() {
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
   const [materialSelected, setMaterialSelected] = useState<any>(undefined);
+  const [loading, setLoading] = useState(true);
   async function loadMateriales() {
     const data = await fetchGET({
       url: "/api/materiales/all",
       error: "Error al obtener los materiales",
     });
     setMateriales(data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -64,6 +67,14 @@ function TablaMateriales() {
   const handleModalUpdateOpen = () => {
     setModalUpdateOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -132,7 +143,6 @@ function TablaMateriales() {
                             );
                             responseSubmit.then((confirmed) => {
                               if (confirmed) {
-                                console.log(material.id);
                                 handleEliminar(material.id.toString());
                               }
                             });

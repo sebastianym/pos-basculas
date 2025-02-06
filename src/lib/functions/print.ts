@@ -1,3 +1,28 @@
+// Asegúrate de que QZ Tray esté disponible (por ejemplo, en el objeto global "qz")
+declare const qz: any;
+/**
+ * Imprime un ticket de compra usando QZ Tray.
+ * @param {string} fecha - Fecha en formato legible.
+ * @param {string} hora - Hora en formato legible.
+ * @param {Array} compras - Array de compras, cada una con { material, peso, precioTotal }.
+ * @param {string} proveedor - Nombre del proveedor.
+ * @param {string} encargado - Nombre del encargado.
+ */
+
+function centerText(text: string, width: number = 44): string {
+  if (text.length >= width) return text;
+  const leftPadding = Math.floor((width - text.length) / 2);
+  return " ".repeat(leftPadding) + text;
+}
+
+/**
+ * Imprime un ticket de servicio usando QZ Tray.
+ * @param {string} fecha - Fecha en formato legible.
+ * @param {string} hora - Hora en formato legible.
+ * @param {Array} ventas - Array de ventas/servicios, cada una con { material, peso }.
+ * @param {string} encargado - Nombre del encargado.
+ */
+
 export async function printTicketCompra(
   fecha: string,
   hora: string,
@@ -6,259 +31,187 @@ export async function printTicketCompra(
   encargado: string
 ) {
   try {
-    let total = 0;
-    let detalleCompras = "";
+    await qz.websocket.connect();
 
-    // Generar detalle de compras y calcular total
-    compras.forEach((compra: any) => {
+    let total = 0;
+    // Cabecera de detalle de compras con columnas fijas
+    let detalleCompras = "Producto         Peso(kg)    Valor\n";
+    detalleCompras += "----------------------------------------\n";
+
+    compras.forEach((compra) => {
       const { material, peso, precioTotal } = compra;
-      const precioTotalNumber = Number(precioTotal);
-      total += precioTotalNumber;
-      detalleCompras += `${material}  Peso: ${peso}kg  Valor: $${precioTotalNumber.toFixed(2)}\n`;
+      const precio = Number(precioTotal);
+      total += precio;
+      // Se formatea cada línea con ancho fijo: 16, 10 y 10 caracteres respectivamente.
+      const materialCol = material.padEnd(16, " ");
+      const pesoCol = peso.toString().padStart(6, " ") + "  ";
+      const precioCol = "$" + precio.toFixed(2).padStart(8, " ");
+      detalleCompras += `${materialCol}${pesoCol}${precioCol}\n`;
     });
 
-    const listaDeOperaciones = [
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [1],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [
-          "--------------------------------------------\n" +
-            "ASORESCATAR\n" +
-            "NIT: 901.064.992-4\n" +
-            "TELEFONO: 315 7057466\n" +
-            "DIRECCION: CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492\n" +
-            "BARRANQUILLA - COLOMBIA\n" +
-            `${fecha} ${hora}\n` +
-            "--------------------------------------------\n",
-        ],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: ["DETALLE DE COMPRAS\n\n" + detalleCompras + "\n"],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`PROVEEDOR: ${proveedor}\n\n`],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`ENCARGADO: ${encargado}\n`],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`TOTAL: $${total.toFixed(2)}\n`],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "Feed",
-        argumentos: [5],
-      },
-      {
-        nombre: "CorteParcial",
-        argumentos: [],
-      },
+    const header = [
+      centerText("ASORESCATAR"),
+      centerText("NIT: 901.064.992-4"),
+      centerText("TELEFONO: 315 7057466"),
+      centerText("CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492"),
+      centerText("BARRANQUILLA - COLOMBIA"),
+      `${fecha}  ${hora}`,
+    ].join("\n");
+
+    const footer = [
+      "----------------------------------------",
+      `PROVEEDOR: ${proveedor}`,
+      `ENCARGADO: ${encargado}`,
+      `TOTAL: $${total.toFixed(2)}`,
+      "----------------------------------------",
+    ].join("\n");
+
+    const ticket =
+      `${header}\n----------------------------------------\n` +
+      "DETALLE DE COMPRAS\n" +
+      detalleCompras +
+      footer;
+
+    const config = qz.configs.create("pos-80250");
+    const data = [
+      "\x1B\x40", // Reset de la impresora
+      ticket + "\n\x1B\x64\x05\x1D\x56\x01", // Avanza líneas y realiza el corte
     ];
 
-    const nombreImpresora = "pos-80250";
-    const cargaUtil = {
-      serial: "",
-      operaciones: listaDeOperaciones,
-      nombreImpresora: nombreImpresora,
-    };
-
-    const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
-      method: "POST",
-      body: JSON.stringify(cargaUtil),
-    });
-
-    const respuesta = await respuestaHttp.json();
-    if (respuesta.ok) {
-      console.log("Impreso correctamente");
-    } else {
-      console.error(respuesta.message);
-    }
-  } catch (e) {
-    console.log(e);
+    await qz.print(config, data);
+    console.log("Ticket de compra impreso correctamente");
+    await qz.websocket.disconnect();
+  } catch (error) {
+    console.error("Error al imprimir ticket de compra:", error);
   }
 }
+
+/**
+ * Imprime un ticket de servicio usando QZ Tray.
+ * @param {string} fecha - Fecha en formato legible.
+ * @param {string} hora - Hora en formato legible.
+ * @param {Array} ventas - Array de ventas/servicios, cada una con { material, peso }.
+ * @param {string} encargado - Nombre del encargado.
+ */
 
 export async function printTicketServicio(
-  fecha: any,
-  hora: any,
+  fecha: string,
+  hora: string,
   ventas: any[],
   encargado: string
-
 ) {
   try {
-    let detalleVentas = "";
+    await qz.websocket.connect();
 
-    // Generar detalle de ventas y calcular total
+    // Cabecera para el detalle de servicio
+    let detalleVentas = "Servicio         Peso(kg)\n";
+    detalleVentas += "------------------------------\n";
+
     ventas.forEach((venta) => {
       const { material, peso } = venta;
-      detalleVentas += `${material}  Peso: ${peso}kg\n`;
+      // Columnas: 18 caracteres para el servicio y 10 para el peso
+      const materialCol = material.padEnd(18, " ");
+      const pesoCol = peso.toString().padStart(10, " ");
+      detalleVentas += `${materialCol}${pesoCol}\n`;
     });
 
-    const listaDeOperaciones = [
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [1],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [
-          "--------------------------------------------\n" +
-            "ASORESCATAR\n" +
-            "NIT: 901.064.992-4\n" +
-            "TELEFONO: 315 7057466\n" +
-            "DIRECCION: CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492\n" +
-            "BARRANQUILLA - COLOMBIA\n" +
-            `${fecha} ${hora}\n` +
-            "--------------------------------------------\n",
-        ],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: ["DETALLE DE SERVICIO\n" + detalleVentas + "\n"],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`ENCARGADO: ${encargado}\n`],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "Feed",
-        argumentos: [5],
-      },
-      {
-        nombre: "CorteParcial",
-        argumentos: [],
-      },
-    ];
+    const header = [
+      centerText("ASORESCATAR"),
+      centerText("NIT: 901.064.992-4"),
+      centerText("TELEFONO: 315 7057466"),
+      centerText("CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492"),
+      centerText("BARRANQUILLA - COLOMBIA"),
+      `${fecha}  ${hora}`,
+    ].join("\n");
 
-    const nombreImpresora = "pos-80250";
-    const cargaUtil = {
-      serial: "",
-      operaciones: listaDeOperaciones,
-      nombreImpresora: nombreImpresora,
-    };
+    const footer = [
+      "----------------------------------------",
+      `ENCARGADO: ${encargado}`,
+      "----------------------------------------",
+    ].join("\n");
 
-    const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
-      method: "POST",
-      body: JSON.stringify(cargaUtil),
-    });
+    const ticket =
+      `${header}\n----------------------------------------\n` +
+      "DETALLE DE SERVICIO\n" +
+      detalleVentas +
+      footer;
 
-    const respuesta = await respuestaHttp.json();
-    if (respuesta.ok) {
-      console.log("Impreso correctamente");
-    } else {
-      console.error(respuesta.message);
-    }
-  } catch (e) {
-    console.log(e);
+    const config = qz.configs.create("pos-80250");
+    const data = ["\x1B\x40", ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
+
+    await qz.print(config, data);
+    console.log("Ticket de servicio impreso correctamente");
+    await qz.websocket.disconnect();
+  } catch (error) {
+    console.error("Error al imprimir ticket de servicio:", error);
   }
 }
 
-export async function printTicketVenta(fecha: any, hora: any, ventas: any[], cliente: string, encargado: string) {
-  try {
-    let total = 0;
-    let detalleVentas = "";
+/**
+ * Imprime un ticket de venta usando QZ Tray.
+ * @param {string} fecha - Fecha en formato legible.
+ * @param {string} hora - Hora en formato legible.
+ * @param {Array} ventas - Array de ventas, cada una con { material, peso, precioTotal }.
+ * @param {string} cliente - Nombre del cliente.
+ * @param {string} encargado - Nombre del encargado.
+ */
 
-    // Generar detalle de ventas y calcular total
+export async function printTicketVenta(
+  fecha: string,
+  hora: string,
+  ventas: any[],
+  cliente: string,
+  encargado: string
+) {
+  try {
+    await qz.websocket.connect();
+
+    let total = 0;
+    // Cabecera de detalle de ventas con columnas fijas
+    let detalleVentas = "Producto         Peso(kg)    Precio Unitario\n";
+    detalleVentas += "----------------------------------------------\n";
+
     ventas.forEach((venta) => {
       const { material, peso, precioTotal } = venta;
-      const precioTotalNumber = Number(precioTotal);
-      total += precioTotalNumber;
-      detalleVentas += `${material}  Peso: ${peso}kg  Valor Unitario: $${precioTotalNumber.toFixed(2)}\n`;
+      const precio = Number(precioTotal);
+      total += precio;
+      // Formateo de columnas: 16 para producto, 10 para peso y 12 para precio
+      const materialCol = material.padEnd(16, " ");
+      const pesoCol = peso.toString().padStart(6, " ") + "  ";
+      const precioCol = "$" + precio.toFixed(2).padStart(10, " ");
+      detalleVentas += `${materialCol}${pesoCol}${precioCol}\n`;
     });
 
-    const listaDeOperaciones = [
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [1],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [
-          "--------------------------------------------\n" +
-            "ASORESCATAR\n" +
-            "NIT: 901.064.992-4\n" +
-            "TELEFONO: 315 7057466\n" +
-            "DIRECCION: CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492\n" +
-            "BARRANQUILLA - COLOMBIA\n" +
-            `${fecha} ${hora}\n` +
-            "--------------------------------------------\n",
-        ],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: ["DETALLE DE VENTA\n" + detalleVentas + "\n"],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`CLIENTE: ${cliente}\n\n`],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`ENCARGADO: ${encargado}\n`],
-      },
-      {
-        nombre: "EscribirTexto",
-        argumentos: [`TOTAL: $${total.toFixed(2)}\n`],
-      },
-      {
-        nombre: "EstablecerAlineacion",
-        argumentos: [0],
-      },
-      {
-        nombre: "Feed",
-        argumentos: [5],
-      },
-      {
-        nombre: "CorteParcial",
-        argumentos: [],
-      },
-    ];
+    const header = [
+      centerText("ASORESCATAR"),
+      centerText("NIT: 901.064.992-4"),
+      centerText("TELEFONO: 315 7057466"),
+      centerText("CARRERA 64 VIA 40 LOMA #3 BODEGA 40-492"),
+      centerText("BARRANQUILLA - COLOMBIA"),
+      `${fecha}  ${hora}`,
+    ].join("\n");
 
-    const nombreImpresora = "pos-80250";
-    const cargaUtil = {
-      serial: "",
-      operaciones: listaDeOperaciones,
-      nombreImpresora: nombreImpresora,
-    };
+    const footer = [
+      "----------------------------------------------",
+      `CLIENTE: ${cliente}`,
+      `ENCARGADO: ${encargado}`,
+      `TOTAL: $${total.toFixed(2)}`,
+      "----------------------------------------------",
+    ].join("\n");
 
-    const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
-      method: "POST",
-      body: JSON.stringify(cargaUtil),
-    });
+    const ticket =
+      `${header}\n----------------------------------------------\n` +
+      "DETALLE DE VENTA\n" +
+      detalleVentas +
+      footer;
 
-    const respuesta = await respuestaHttp.json();
-    if (respuesta.ok) {
-      console.log("Impreso correctamente");
-    } else {
-      console.error(respuesta.message);
-    }
-  } catch (e) {
-    console.log(e);
+    const config = qz.configs.create("pos-80250");
+    const data = ["\x1B\x40", ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
+
+    await qz.print(config, data);
+    console.log("Ticket de venta impreso correctamente");
+    await qz.websocket.disconnect();
+  } catch (error) {
+    console.error("Error al imprimir ticket de venta:", error);
   }
 }

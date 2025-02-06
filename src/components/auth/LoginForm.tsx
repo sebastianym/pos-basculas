@@ -83,13 +83,6 @@ export default function LoginForm() {
                 />
                 <ApiErrors error={formState?.apiErrors} />
               </div>
-
-              <a className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 hover:text-pink-600 text-gray-600 w-fit mb-2 mt-7 font-medium block">
-                ¿Olvidaste tu contraseña?
-              </a>
-              <a className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 hover:text-pink-600 text-gray-600 w-fit block mb-4">
-                ¿Problemas para ingresar a tu cuenta?
-              </a>
             </form>
           </div>
         </div>

@@ -83,6 +83,12 @@ function UpdateClientModal({
       setCorreo("");
       setNit("");
       handleModalClose();
+    } else if (!formState.success && formState.message) {
+      successAlert(
+        "Error",
+        formState.message || "Error al actualizar el cliente",
+        "error"
+      );
     }
   }, [formState]);
   return (

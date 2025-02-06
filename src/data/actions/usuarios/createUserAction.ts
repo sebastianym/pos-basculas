@@ -35,6 +35,11 @@ export default async function createUserAction(
       error: "Error al crear el usuario.",
     });
 
+    // Si la API responde con un error (por ejemplo, NIT duplicado) lo devolvemos
+    if (responseData?.error) {
+      return {success: false, message: responseData.error};
+    }
+
     if (!responseData) {
       return {
         ...prevState,

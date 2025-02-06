@@ -16,10 +16,12 @@ import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
 import CreateClientModal from "@/components/modals/clientes/createClientModal";
 import UpdateClientModal from "@/components/modals/clientes/updateClientModal";
+import { CircularProgress } from "@nextui-org/react";
 
 function TablaClientes() {
   const [clientes, setClientes] = useState<any>([]);
   const [updateTable, setUpdateTable] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
   const [clienteSelected, setClienteSelected] = useState<any>(undefined);
@@ -30,6 +32,7 @@ function TablaClientes() {
       error: "Error al obtener los clientes",
     });
     setClientes(data);
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -65,6 +68,14 @@ function TablaClientes() {
   const handleModalUpdateOpen = () => {
     setModalUpdateOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>

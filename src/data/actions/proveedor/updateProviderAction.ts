@@ -37,6 +37,11 @@ export default async function updateProviderAction(
       error: "Error al actualizar el proveedor.",
     });
 
+    // Si la API responde con un error (por ejemplo, NIT duplicado) lo devolvemos
+    if (responseData?.error) {
+      return {success: false, message: responseData.error};
+    }
+
     if (!responseData) {
       return {
         ...prevState,

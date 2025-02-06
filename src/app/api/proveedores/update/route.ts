@@ -22,6 +22,18 @@ export async function POST(request: Request) {
     const { id, nombreProveedor, direccion, telefono, correo, NIT } =
       await request.json();
 
+    // Comprobar si ya existe un cliente con el mismo NIT
+    const existingProveedor = await prisma.proveedor.findUnique({
+      where: { NIT },
+    });
+
+    if (existingProveedor) {
+      return NextResponse.json(
+        { error: "El identificador (NIT) ya existe" },
+        { status: 400 }
+      );
+    }
+
     const updateProveedor = await prisma.proveedor.update({
       where: {
         id: Number(id),
