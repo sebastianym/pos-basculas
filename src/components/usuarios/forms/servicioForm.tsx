@@ -1,12 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input, Select, SelectItem } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { usePort } from "@/components/context/PortContext";
 import { successAlert } from "@/lib/utils/alerts/successAlert";
 import { printTicketServicio } from "@/lib/functions/print";
 import getUserInformationAction from "@/data/actions/user/getUserInformationAction";
-import { fetchGET } from "@/data/services/fetchGET";
 
 function ServicioForm() {
   const {
@@ -28,22 +27,8 @@ function ServicioForm() {
   const [pesajes, setPesajes] = useState<Pesaje[]>([]);
   const [processed, setProcessed] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState<string>("");
-  const [materiales, setMateriales] = useState<any>([]);
-  // Estado controlado para el select de material
+  // Estado para el material, ahora es un input controlado
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
-
-  async function loadMateriales() {
-    try {
-      const data = await fetchGET({
-        url: "/api/materiales/all",
-        error: "Error al obtener los materiales",
-      });
-      setMateriales(data);
-    } catch (error) {
-      console.error(error);
-      successAlert("Error", "No se pudieron cargar los materiales", "error");
-    }
-  }
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,18 +44,17 @@ function ServicioForm() {
         );
       }
     };
-    loadMateriales();
     fetchUser();
   }, []);
 
   const handleProcessPesaje = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Validar que se haya seleccionado un material y que exista un peso
+      // Validar que se haya ingresado un material y que exista un peso
       if (!materialSeleccionado.trim() || !output) {
         successAlert(
           "Campos incompletos",
-          "Por favor, seleccione un material y pese el servicio",
+          "Por favor, ingrese un material y pese el servicio",
           "error"
         );
         return;
@@ -125,12 +109,7 @@ function ServicioForm() {
       const formattedDate = currentDate.toLocaleDateString();
       const formattedTime = formatTime(currentDate);
 
-      printTicketServicio(
-        formattedDate,
-        formattedTime,
-        pesajes,
-        nombreCompleto
-      );
+      printTicketServicio(formattedDate, formattedTime, pesajes, nombreCompleto);
 
       // Reiniciar estado
       setPesajes([]);
@@ -178,19 +157,13 @@ function ServicioForm() {
         <label className="text-sm font-medium leading-none" htmlFor="material">
           Material
         </label>
-        <Select
+        <Input
           id="material"
           name="material"
-          placeholder="Seleccione un material"
+          placeholder="Escriba el nombre del material"
           value={materialSeleccionado}
           onChange={(e) => setMaterialSeleccionado(e.target.value)}
-        >
-          {materiales.map((material: any) => (
-            <SelectItem key={material.nombre} value={material.nombre}>
-              {material.nombre}
-            </SelectItem>
-          ))}
-        </Select>
+        />
       </div>
 
       <div className="space-y-2 flex flex-col items-center justify-start">
