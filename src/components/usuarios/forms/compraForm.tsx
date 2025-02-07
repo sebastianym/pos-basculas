@@ -35,6 +35,7 @@ function CompraForm() {
   const [userId, setUserId] = useState<number>(0);
   const [materiales, setMateriales] = useState<any>([]);
   const [proveedores, setProveedores] = useState<any>([]);
+  const [isWaiting, setIsWaiting] = useState(false);
   // Estado para controlar el select de material
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
 
@@ -69,6 +70,7 @@ function CompraForm() {
     proveedorId: number
   ) {
     try {
+      console.log(valorCompra, materialId, usuarioId, proveedorId);
       await fetchPOST({
         url: "/api/compras/create",
         body: { valorCompra, materialId, usuarioId, proveedorId },
@@ -107,7 +109,7 @@ function CompraForm() {
     e.preventDefault();
     try {
       const formData = new FormData(e.currentTarget);
-      const proveedorSeleccionado = proveedor as string;
+      const proveedorSeleccionado = formData.get("proveedor") as string;
       const materialSeleccionadoForm = formData.get("material") as string;
       const precioTotalValue = formData.get("precioTotal") as string;
       const pesoValue = output; // Valor obtenido de la báscula
@@ -122,6 +124,8 @@ function CompraForm() {
         return;
       }
 
+      console.log(proveedorSeleccionado, materialSeleccionadoForm, pesoValue);
+
       const nuevaCompra = {
         id: Date.now(),
         material: materialSeleccionadoForm,
@@ -133,6 +137,8 @@ function CompraForm() {
       };
 
       setProveedor(proveedorSeleccionado);
+
+      console.log(proveedor, nuevaCompra);
       setCompras((prev) => [...prev, nuevaCompra]);
       setProcessed(true);
       successAlert(
@@ -144,7 +150,6 @@ function CompraForm() {
       // Reiniciar el formulario a su estado inicial
       e.currentTarget.reset();
       setMaterialSeleccionado("");
-      setProveedor("");
       setOutput("");
     } catch (error) {
       console.error("Error al procesar la compra", error);
@@ -174,6 +179,8 @@ function CompraForm() {
         const proveedorEncontrado = proveedores.find(
           (p: any) => p.nombreProveedor === proveedor
         );
+        console.log(proveedores, proveedor);
+        console.log(materialEncontrado, proveedorEncontrado);
         if (materialEncontrado && proveedorEncontrado) {
           await guardarCompra(
             precioTotalNumber,
@@ -232,7 +239,6 @@ function CompraForm() {
           id="proveedor"
           name="proveedor"
           placeholder="Seleccione un proveedor"
-          onChange={(e) => setProveedor(e.target.value)} // Actualiza el estado
         >
           {proveedores.map((proveedor: any) => (
             <SelectItem
@@ -281,6 +287,8 @@ function CompraForm() {
             color="primary"
             variant="ghost"
             onClick={async () => {
+              if (isWaiting) return; // Evita clics múltiples en espera
+              setIsWaiting(true); // Bloquea el botón temporalmente
               try {
                 setOutput("");
                 if (port) {
@@ -288,10 +296,12 @@ function CompraForm() {
                 }
               } catch (error) {
                 console.error("Error al pesar:", error);
+              } finally {
+                setTimeout(() => setIsWaiting(false), 1000); // Espera 1 segundo antes de reactivar el botón
               }
             }}
             className="disabled:cursor-not-allowed disabled:opacity-70"
-            disabled={!isConnected}
+            disabled={!isConnected || isWaiting}
             type="button"
           >
             Pesar

@@ -30,13 +30,12 @@ function VentaForm() {
 
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [processed, setProcessed] = useState(false);
-  const [cliente, setCliente] = useState(""); // Se usará para persistir el cliente durante el ciclo de ventas
+  const [cliente, setCliente] = useState("");
   const [nombreCompleto, setNombreCompleto] = useState<string>("");
   const [userId, setUserId] = useState<number>(0);
   const [materiales, setMateriales] = useState<any>([]);
   const [clientes, setClientes] = useState<any>([]);
-
-  // Estados para controlar los selects
+  // Estado para controlar el select de material y cliente
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string>("");
 
@@ -119,13 +118,14 @@ function VentaForm() {
         id: Date.now(),
         material: materialSeleccionadoForm,
         peso: Number(pesoValue),
+        // Aquí puedes ajustar el precio por Kg dinámicamente si fuera necesario;
+        // se puede obtener de la misma forma que en CompraForm:
         precioPorKg:
           materiales.find((m: any) => m.nombre === materialSeleccionadoForm)
             ?.precioPorKg || 0,
         precioTotal: Number(precioTotalValue),
       };
 
-      // Actualizamos el cliente a usar durante el ciclo de ventas
       setCliente(clienteSeleccionadoForm);
       setVentas((prev) => [...prev, nuevaVenta]);
       setProcessed(true);
@@ -135,11 +135,11 @@ function VentaForm() {
         "success"
       );
 
-      // Limpiar manualmente solo los campos que deben reiniciarse: material y peso.
-      // No se limpia el campo de cliente para que persista.
+      // Reiniciar el formulario a su estado inicial
+      e.currentTarget.reset();
       setMaterialSeleccionado("");
+      setClienteSeleccionado("");
       setOutput("");
-      // Nota: No se llama a e.currentTarget.reset() para evitar limpiar el select de cliente.
     } catch (error) {
       console.error("Error al procesar la venta", error);
       successAlert("Error", "Ocurrió un error al procesar la venta", "error");
@@ -150,7 +150,7 @@ function VentaForm() {
     let hours = fecha.getHours();
     const minutes = fecha.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12;
+    hours = hours % 12 || 12; // Convierte 0 a 12 para la hora en formato 12 horas
     const minutesStr = minutes < 10 ? "0" + minutes : minutes;
     return `${hours}:${minutesStr} ${ampm}`;
   }
@@ -169,7 +169,7 @@ function VentaForm() {
         nombreCompleto
       );
 
-      // Guardar cada venta
+      // Recorrer las ventas para guardar cada una
       for (const venta of ventas) {
         const { precioTotal } = venta;
         const precioTotalNumber = Number(precioTotal);
@@ -188,13 +188,10 @@ function VentaForm() {
           );
         }
       }
-      // Limpiar estados luego de imprimir el ticket:
+      // Limpiar estado
       setVentas([]);
       setProcessed(false);
       setOutput("");
-      // Aquí se limpia el cliente para la siguiente tanda de ventas.
-      setCliente("");
-      setClienteSeleccionado("");
     } catch (error) {
       console.error("Error al imprimir ticket:", error);
       successAlert("Error", "Ocurrió un error al imprimir el ticket", "error");
