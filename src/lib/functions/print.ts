@@ -72,7 +72,7 @@ export async function printTicketCompra(
       detalleCompras +
       footer;
 
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = [
       "\x1B\x40", // Reset de la impresora
       ticket + "\n\x1B\x64\x05\x1D\x56\x01", // Avanza líneas y realiza el corte
@@ -136,7 +136,7 @@ export async function printTicketServicio(
       detalleVentas +
       footer;
 
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = ["\x1B\x40", ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
 
     await qz.print(config, data);
@@ -205,7 +205,7 @@ export async function printTicketVenta(
       detalleVentas +
       footer;
 
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = ["\x1B\x40", ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
 
     await qz.print(config, data);
