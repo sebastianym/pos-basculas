@@ -35,7 +35,7 @@ export async function printTicketCompra(
 
     let total = 0;
     // Cabecera de detalle de compras con columnas fijas
-    let detalleCompras = "Producto         Peso(kg)    Peso Rechazo(kg)    Valor\n";
+    let detalleCompras = "Producto         Peso(kg)    Rechazo(kg)    Valor\n";
 
     detalleCompras += "----------------------------------------\n";
 
@@ -46,8 +46,8 @@ export async function printTicketCompra(
       // Se formatea cada línea con ancho fijo: 16, 10 y 10 caracteres respectivamente.
       const materialCol = material.padEnd(16, " ");
       const pesoCol = peso.toString().padStart(6, " ") + "  ";
-      const rechazoCol = rechazo.toString().padStart(13, " ") + "  ";
-      const precioCol = "$" + precio.toFixed(2).padStart(8, " ");
+      const rechazoCol = rechazo.toString().padStart(8, " ") + "  ";
+      const precioCol = "$" + precio.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".").padStart(10, " ");
       detalleCompras += `${materialCol}${pesoCol}${rechazoCol}${precioCol}\n`;
     });
 
@@ -170,7 +170,7 @@ export async function printTicketVenta(
 
     let total = 0;
     // Cabecera de detalle de ventas con columnas fijas
-    let detalleVentas = "Producto         Peso(kg)    Peso Rechazo(kg)    Precio Unitario\n";
+    let detalleVentas = "Producto         Peso(kg)    Rechazo(kg)    Precio Unitario\n";
     detalleVentas += "----------------------------------------------\n";
 
     ventas.forEach((venta) => {
@@ -180,8 +180,8 @@ export async function printTicketVenta(
       // Formateo de columnas: 16 para producto, 10 para peso y 12 para precio
       const materialCol = material.padEnd(16, " ");
       const pesoCol = peso.toString().padStart(6, " ") + "  ";
-      const rechazoCol = rechazo.toString().padStart(13, " ") + "  ";
-      const precioCol = "$" + precio.toFixed(2).padStart(15, " ");
+      const rechazoCol = rechazo.toString().padStart(8, " ") + "  ";
+      const precioCol = "$" + precio.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".").padStart(10, " ");
       detalleVentas += `${materialCol}${pesoCol}${rechazoCol}${precioCol}\n`;
     });
 
