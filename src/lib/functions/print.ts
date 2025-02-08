@@ -62,7 +62,7 @@ export async function printTicketCompra(
       "----------------------------------------",
       `PROVEEDOR: ${proveedor}`,
       `ENCARGADO: ${encargado}`,
-      `TOTAL: $${total.toFixed(2)}`,
+      `TOTAL: $${total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
       "----------------------------------------",
     ].join("\n");
 
@@ -195,7 +195,7 @@ export async function printTicketVenta(
       "----------------------------------------------",
       `CLIENTE: ${cliente}`,
       `ENCARGADO: ${encargado}`,
-      `TOTAL: $${total.toFixed(2)}`,
+      `TOTAL: $${total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`,
       "----------------------------------------------",
     ].join("\n");
 

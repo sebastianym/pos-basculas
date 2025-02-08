@@ -6,7 +6,7 @@ import "../assets/globals.css";
 
 export const metadata: Metadata = {
   title: "POS System",
-  description: "Simple POS System",
+  description: "Simple POS System - created by Sebastián Yepes Marta +57 305 763 5018",
 };
 
 export default function RootLayout({

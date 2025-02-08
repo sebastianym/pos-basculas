@@ -24,7 +24,7 @@ export default function LoginForm() {
             <div
               className="absolute inset-0 lg:rounded-l-2xl brightness-[0.5] shadow-xl"
               style={{
-                backgroundImage: "url('/assets/login-side.jpg')",
+                backgroundImage: "url('/assets/imageLogin.jfif')",
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
@@ -85,6 +85,10 @@ export default function LoginForm() {
               </div>
             </form>
           </div>
+        </div>
+        <div className="mt-8 text-center text-gray-600">
+          <p>Creado por Sebastian Yepes M.</p>
+          <p>Contacto: (+57) 305 763 5018</p>
         </div>
       </div>
     </div>

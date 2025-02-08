@@ -36,6 +36,7 @@ function CompraForm() {
   const [materiales, setMateriales] = useState<any>([]);
   const [proveedores, setProveedores] = useState<any>([]);
   const [isWaiting, setIsWaiting] = useState(false);
+  const [rechazo, setRechazo] = useState(0);
   // Estado para controlar el select de material
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
 
@@ -124,6 +125,16 @@ function CompraForm() {
         return;
       }
 
+      // Validar rechazo
+      if (rechazo >= Number(pesoValue)) {
+        successAlert(
+          "Rechazo inválido",
+          "El rechazo no puede ser mayor o igual al peso total",
+          "error"
+        );
+        return;
+      }
+
       console.log(proveedorSeleccionado, materialSeleccionadoForm, pesoValue);
 
       const nuevaCompra = {
@@ -151,6 +162,7 @@ function CompraForm() {
       e.currentTarget.reset();
       setMaterialSeleccionado("");
       setOutput("");
+      setRechazo(0);
     } catch (error) {
       console.error("Error al procesar la compra", error);
       successAlert("Error", "Ocurrió un error al procesar la compra", "error");
@@ -309,6 +321,21 @@ function CompraForm() {
         </div>
       </div>
 
+      <div className="space-y-2 flex flex-col items-center">
+        <label htmlFor="rechazo" className="text-sm font-medium w-full">
+          Rechazo (Opcional)
+        </label>
+        <div className="flex w-full">
+          <Input
+            id="rechazo"
+            type="text"
+            placeholder="El rechazo en kg"
+            onChange={(e) => setRechazo(Number(e.target.value))}
+            className="pr-2"
+          />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <label htmlFor="precioPorKg" className="text-sm font-medium">
           Precio por Kg
@@ -336,7 +363,7 @@ function CompraForm() {
           type="number"
           placeholder="Precio total"
           value={(
-            Number(output) *
+            (Number(output) - rechazo) *
               (materiales.find(
                 (material: any) => material.nombre === materialSeleccionado
               )?.precioPorKg || 0) || 0

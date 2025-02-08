@@ -38,6 +38,7 @@ function VentaForm() {
   // Estado para controlar el select de material y cliente
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string>("");
+  const [rechazo, setRechazo] = useState(0);
 
   async function loadClientes() {
     try {
@@ -114,6 +115,16 @@ function VentaForm() {
         return;
       }
 
+      // Validar rechazo
+      if (rechazo >= Number(pesoValue)) {
+        successAlert(
+          "Rechazo inválido",
+          "El rechazo no puede ser mayor o igual al peso total",
+          "error"
+        );
+        return;
+      }
+
       const nuevaVenta: Venta = {
         id: Date.now(),
         material: materialSeleccionadoForm,
@@ -140,6 +151,7 @@ function VentaForm() {
       setMaterialSeleccionado("");
       setClienteSeleccionado("");
       setOutput("");
+      setRechazo(0);
     } catch (error) {
       console.error("Error al procesar la venta", error);
       successAlert("Error", "Ocurrió un error al procesar la venta", "error");
@@ -299,6 +311,21 @@ function VentaForm() {
           >
             Pesar
           </Button>
+        </div>
+      </div>
+
+      <div className="space-y-2 flex flex-col items-center">
+        <label htmlFor="rechazo" className="text-sm font-medium w-full">
+          Rechazo (Opcional)
+        </label>
+        <div className="flex w-full">
+          <Input
+            id="rechazo"
+            type="text"
+            placeholder="El rechazo en kg"
+            onChange={(e) => setRechazo(Number(e.target.value))}
+            className="pr-2"
+          />
         </div>
       </div>
 
