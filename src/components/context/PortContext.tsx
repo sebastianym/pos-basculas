@@ -60,21 +60,24 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(reader);
       const decoder = new TextDecoder();
       let buffer = "";
-
+  
       while (true) {
         const { value, done } = await reader.read();
-        console.log(value, done);
         if (done) break;
         if (value) {
-          buffer += decoder.decode(value);
+          buffer += decoder.decode(value, { stream: true });
           if (buffer.includes("\n")) {
             const lines = buffer.split("\n");
             const lastLine = lines.pop()?.trim();
             buffer = lines.join("\n");
+            
+            console.log("Last line:", lastLine); // DEBUG
+  
             if (lastLine) {
-              const match = lastLine.match(/wn(\d+\.\d+)kg/);
+              const match = lastLine.match(/(\d+\.?\d*)\s?kg/i);
               if (match && match[1]) {
-                setOutput(match[1]);
+                console.log("Peso detectado:", match[1]); // DEBUG
+                setOutput(match[1]); // Aquí se debería actualizar el estado
                 break;
               }
             }
@@ -92,7 +95,7 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
       disconnectSerial();
     }
   };
-
+  
   const disconnectSerial = async () => {
     try {
       if (port) {
