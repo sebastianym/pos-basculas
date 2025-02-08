@@ -57,11 +57,13 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
   const readData = async (selectedPort: SerialPort) => {
     try {
       const reader = selectedPort.readable.getReader();
+      console.log(reader);
       const decoder = new TextDecoder();
       let buffer = "";
 
       while (true) {
         const { value, done } = await reader.read();
+        console.log(value, done);
         if (done) break;
         if (value) {
           buffer += decoder.decode(value);
