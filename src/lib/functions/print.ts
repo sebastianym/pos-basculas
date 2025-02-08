@@ -35,18 +35,20 @@ export async function printTicketCompra(
 
     let total = 0;
     // Cabecera de detalle de compras con columnas fijas
-    let detalleCompras = "Producto         Peso(kg)    Valor\n";
+    let detalleCompras = "Producto         Peso(kg)    Peso Rechazo(kg)    Valor\n";
+
     detalleCompras += "----------------------------------------\n";
 
     compras.forEach((compra) => {
-      const { material, peso, precioTotal } = compra;
+      const { material, peso, precioTotal, rechazo } = compra;
       const precio = Number(precioTotal);
       total += precio;
       // Se formatea cada línea con ancho fijo: 16, 10 y 10 caracteres respectivamente.
       const materialCol = material.padEnd(16, " ");
       const pesoCol = peso.toString().padStart(6, " ") + "  ";
+      const rechazoCol = rechazo.toString().padStart(13, " ") + "  ";
       const precioCol = "$" + precio.toFixed(2).padStart(8, " ");
-      detalleCompras += `${materialCol}${pesoCol}${precioCol}\n`;
+      detalleCompras += `${materialCol}${pesoCol}${rechazoCol}${precioCol}\n`;
     });
 
     const header = [
@@ -168,18 +170,19 @@ export async function printTicketVenta(
 
     let total = 0;
     // Cabecera de detalle de ventas con columnas fijas
-    let detalleVentas = "Producto         Peso(kg)    Precio Unitario\n";
+    let detalleVentas = "Producto         Peso(kg)    Peso Rechazo(kg)    Precio Unitario\n";
     detalleVentas += "----------------------------------------------\n";
 
     ventas.forEach((venta) => {
-      const { material, peso, precioTotal } = venta;
+      const { material, peso, precioTotal, rechazo } = venta;
       const precio = Number(precioTotal);
       total += precio;
       // Formateo de columnas: 16 para producto, 10 para peso y 12 para precio
       const materialCol = material.padEnd(16, " ");
       const pesoCol = peso.toString().padStart(6, " ") + "  ";
-      const precioCol = "$" + precio.toFixed(2).padStart(10, " ");
-      detalleVentas += `${materialCol}${pesoCol}${precioCol}\n`;
+      const rechazoCol = rechazo.toString().padStart(13, " ") + "  ";
+      const precioCol = "$" + precio.toFixed(2).padStart(15, " ");
+      detalleVentas += `${materialCol}${pesoCol}${rechazoCol}${precioCol}\n`;
     });
 
     const header = [

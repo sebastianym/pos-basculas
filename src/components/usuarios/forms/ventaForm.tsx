@@ -26,6 +26,7 @@ function VentaForm() {
     peso: number;
     precioPorKg: number;
     precioTotal: number;
+    rechazo: number;
   }
 
   const [ventas, setVentas] = useState<Venta[]>([]);
@@ -129,6 +130,7 @@ function VentaForm() {
         id: Date.now(),
         material: materialSeleccionadoForm,
         peso: Number(pesoValue),
+        rechazo: rechazo,
         // Aquí puedes ajustar el precio por Kg dinámicamente si fuera necesario;
         // se puede obtener de la misma forma que en CompraForm:
         precioPorKg:

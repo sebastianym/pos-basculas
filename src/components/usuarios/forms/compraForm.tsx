@@ -27,6 +27,7 @@ function CompraForm() {
       peso: number;
       precioPorKg: number;
       precioTotal: number;
+      rechazo: number;
     }>
   >([]);
   const [processed, setProcessed] = useState(false);
@@ -145,6 +146,7 @@ function CompraForm() {
           materiales.find((m: any) => m.nombre === materialSeleccionadoForm)
             ?.precioPorKg || 0,
         precioTotal: Number(precioTotalValue),
+        rechazo,
       };
 
       setProveedor(proveedorSeleccionado);
