@@ -76,3 +76,13 @@ model Compra {
   proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
   proveedorId Int
 }
+
+model Empresa {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  direccion String
+  telefono  String
+  NIT       String @unique
+  ciudad    String
+  pais      String
+}

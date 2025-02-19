@@ -108,7 +108,7 @@ function TablaClientes() {
         {/* Encabezado y botón para crear cliente */}
         <div className="flex flex-col items-center max-w-4xl w-full space-y-4">
           <div className="flex items-center justify-between w-full">
-            <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+            <h1 className="text-3xl font-bold my-8 text-center text-[#1a47b8]">
               Tabla de Clientes
             </h1>
             <Button

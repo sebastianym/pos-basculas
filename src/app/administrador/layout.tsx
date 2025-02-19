@@ -2,6 +2,7 @@
 
 import {
   Box,
+  InfoIcon,
   LucideAreaChart,
   LucideBarChart4,
   Scale,
@@ -19,17 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/custom/LogoutButton";
 
 export default function DashboardLayout({
@@ -133,6 +124,19 @@ export default function DashboardLayout({
                   >
                     <LucideBarChart4 className="mr-2 h-4 w-4" />
                     Administrar Compras
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href="/administrador/infoEmpresa"
+                    className={`w-full text-black hover:bg-white/10 ${
+                      pathname === "/administrador/infoEmpresa" ? "bg-white/20" : ""
+                    }`}
+                  >
+                    <InfoIcon className="mr-2 h-4 w-4" />
+                    Administrar Información Empresa
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
