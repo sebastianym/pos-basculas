@@ -25,8 +25,10 @@ function TablaClientes() {
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
   const [clienteSelected, setClienteSelected] = useState<any>(undefined);
+  const [searchTerm, setSearchTerm] = useState(""); // Estado para el input de búsqueda
 
   async function loadClientes() {
+    setLoading(true);
     const data = await fetchGET({
       url: "/api/clientes/all",
       error: "Error al obtener los clientes",
@@ -77,6 +79,16 @@ function TablaClientes() {
     );
   }
 
+  // Filtrar clientes por nombre, correo o NIT (la búsqueda es insensible a mayúsculas/minúsculas)
+  const filteredClientes = clientes.filter((cliente: any) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      cliente.nombre.toLowerCase().includes(search) ||
+      cliente.correo.toLowerCase().includes(search) ||
+      (cliente.NIT && String(cliente.NIT).toLowerCase().includes(search))
+    );
+  });
+
   return (
     <div>
       <CreateClientModal
@@ -93,20 +105,32 @@ function TablaClientes() {
         setUpdateTable={setUpdateTable}
       />
       <div className="flex flex-col items-center">
-        <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
-          <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
-            Tabla de Clientes
-          </h1>
-          <Button
-            className="bg-[#1a47b8]"
-            onClick={() => {
-              handleModalCreateOpen();
-            }}
-          >
-            + Crear cliente
-          </Button>
+        {/* Encabezado y botón para crear cliente */}
+        <div className="flex flex-col items-center max-w-4xl w-full space-y-4">
+          <div className="flex items-center justify-between w-full">
+            <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+              Tabla de Clientes
+            </h1>
+            <Button
+              className="bg-[#1a47b8]"
+              onClick={handleModalCreateOpen}
+            >
+              + Crear cliente
+            </Button>
+          </div>
+          {/* Input de búsqueda */}
+          <div className="w-full">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por nombre, correo o NIT"
+              className="w-full border rounded p-2"
+            />
+          </div>
         </div>
-        <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
+        {/* Tabla de clientes */}
+        <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1 mt-4">
           <Table>
             <TableHeader>
               <TableRow>
@@ -119,8 +143,8 @@ function TablaClientes() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {clientes && clientes.length > 0 ? (
-                clientes.map((cliente: any) => (
+              {filteredClientes && filteredClientes.length > 0 ? (
+                filteredClientes.map((cliente: any) => (
                   <TableRow key={cliente.id}>
                     <TableCell>{cliente.nombre}</TableCell>
                     <TableCell>{cliente.direccion}</TableCell>
@@ -146,11 +170,11 @@ function TablaClientes() {
                           onClick={async () => {
                             const responseSubmit = confirmAlert(
                               "Eliminar cliente",
-                              "¿Estás seguro de eliminar este cliente?, se eliminaran las ventas asociadas al cliente"
+                              "¿Estás seguro de eliminar este cliente?, se eliminarán las ventas asociadas al cliente"
                             );
                             responseSubmit.then((confirmed) => {
                               if (confirmed) {
-                                handleEliminar(cliente.id.toString());
+                                handleEliminar(cliente.id);
                               }
                             });
                           }}
