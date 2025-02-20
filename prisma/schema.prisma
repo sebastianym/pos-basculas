@@ -78,11 +78,12 @@ model Compra {
 }
 
 model Empresa {
-  id        Int    @id @default(autoincrement())
-  nombre    String
-  direccion String
-  telefono  String
-  NIT       String @unique
-  ciudad    String
-  pais      String
+  id              Int    @id @default(autoincrement())
+  nombre          String
+  direccion       String
+  telefono        String
+  NIT             String @unique
+  ciudad          String
+  pais            String
+  numeroDeTiquete Int    @default(0)
 }

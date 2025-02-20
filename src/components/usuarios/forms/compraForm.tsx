@@ -8,6 +8,7 @@ import { printTicketCompra } from "@/lib/functions/print";
 import getUserInformationAction from "@/data/actions/user/getUserInformationAction";
 import { fetchGET } from "@/data/services/fetchGET";
 import { fetchPOST } from "@/data/services/fetchPOST";
+import { set } from "zod";
 
 function CompraForm() {
   const {
@@ -106,6 +107,24 @@ function CompraForm() {
     loadMateriales();
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (isConnected && !isWaiting) {
+        setIsWaiting(true);
+        try {
+          if (port) {
+            await readData(port);
+          }
+        } catch (error) {
+          console.error("Error al pesar:", error);
+        } finally {
+          setIsWaiting(false);
+        }
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isConnected, isWaiting, port, readData]);
 
   const handleProcessCompra = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -237,7 +256,10 @@ function CompraForm() {
         ) : (
           <Button
             className="bg-purple-600 hover:bg-purple-700 text-white"
-            onClick={disconnectSerial}
+            onClick={() => {
+              disconnectSerial();
+              setOutput("");
+            }}
             type="button"
           >
             Desconectar
@@ -297,7 +319,7 @@ function CompraForm() {
             readOnly
             className="pr-2"
           />
-          <Button
+          {/* <Button
             color="primary"
             variant="ghost"
             onClick={async () => {
@@ -319,7 +341,7 @@ function CompraForm() {
             type="button"
           >
             Pesar
-          </Button>
+          </Button> */}
         </div>
       </div>
 

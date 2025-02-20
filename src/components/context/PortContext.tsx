@@ -60,7 +60,7 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(reader);
       const decoder = new TextDecoder();
       let buffer = "";
-  
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -70,16 +70,23 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
             const lines = buffer.split("\n");
             const lastLine = lines.pop()?.trim();
             buffer = lines.join("\n");
-            
+
             console.log("Last line:", lastLine); // DEBUG
-  
+
             if (lastLine) {
               const match = lastLine.match(/(\d+\.?\d*)\s?kg/i);
               if (match && match[1]) {
-                console.log("Peso detectado:", match[1]); // DEBUG
-                setOutput(match[1]); // Aquí se debería actualizar el estado
+                const peso = parseFloat(match[1]);
+                console.log("Peso detectado:", peso);
+                setOutput(peso.toString());
                 break;
               }
+
+              // if (match && match[1]) {
+              //   console.log("Peso detectado:", match[1]); // DEBUG
+              //   setOutput(match[1]); // Aquí se debería actualizar el estado
+              //   break;
+              // }
             }
           }
         }
@@ -95,7 +102,7 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
       disconnectSerial();
     }
   };
-  
+
   const disconnectSerial = async () => {
     try {
       if (port) {
@@ -110,7 +117,11 @@ export const PortProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (error) {
       console.error("Error al desconectar el puerto:", error);
-      successAlert("Error", "Ocurrió un error al desconectar la báscula", "error");
+      successAlert(
+        "Error",
+        "Ocurrió un error al desconectar la báscula",
+        "error"
+      );
     }
   };
 

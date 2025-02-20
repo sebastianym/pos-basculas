@@ -28,6 +28,10 @@ const formSchema = z.object({
   direccion: z.string().min(5, "La dirección debe tener al menos 5 caracteres"),
   ciudad: z.string().min(2, "La ciudad debe tener al menos 2 caracteres"),
   pais: z.string().min(2, "El país debe tener al menos 2 caracteres"),
+  numeroDeTiquete: z.union([
+    z.string().regex(/^\d+$/, "El número de tiquete debe ser un número"),
+    z.number().int().min(1, "El número de tiquete debe ser mayor a 0"),
+  ]),
 });
 
 export default function CompanyInfo() {
@@ -168,6 +172,19 @@ export default function CompanyInfo() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>País</FormLabel>
+                  <FormControl>
+                    <Input disabled={!isEditing} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="numeroDeTiquete"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de tiquete</FormLabel>
                   <FormControl>
                     <Input disabled={!isEditing} {...field} />
                   </FormControl>

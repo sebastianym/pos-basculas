@@ -26,6 +26,7 @@ function ServicioForm() {
 
   const [pesajes, setPesajes] = useState<Pesaje[]>([]);
   const [processed, setProcessed] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   const [nombreCompleto, setNombreCompleto] = useState<string>("");
   // Estado para el material, ahora es un input controlado
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
@@ -46,6 +47,24 @@ function ServicioForm() {
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (isConnected && !isWaiting) {
+        setIsWaiting(true);
+        try {
+          if (port) {
+            await readData(port);
+          }
+        } catch (error) {
+          console.error("Error al pesar:", error);
+        } finally {
+          setIsWaiting(false);
+        }
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isConnected, isWaiting, port, readData]);
 
   const handleProcessPesaje = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -179,26 +198,6 @@ function ServicioForm() {
             readOnly
             className="pr-2"
           />
-          <Button
-            color="primary"
-            variant="ghost"
-            onClick={async () => {
-              try {
-                setOutput("");
-                if (port) {
-                  await readData(port);
-                }
-              } catch (error) {
-                console.error("Error al pesar:", error);
-                successAlert("Error", "Ocurrió un error al pesar", "error");
-              }
-            }}
-            className="disabled:cursor-not-allowed disabled:opacity-70"
-            disabled={!isConnected}
-            type="button"
-          >
-            Pesar
-          </Button>
         </div>
       </div>
 

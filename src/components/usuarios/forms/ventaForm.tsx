@@ -36,6 +36,7 @@ function VentaForm() {
   const [userId, setUserId] = useState<number>(0);
   const [materiales, setMateriales] = useState<any>([]);
   const [clientes, setClientes] = useState<any>([]);
+  const [isWaiting, setIsWaiting] = useState(false);
   // Estado para controlar el select de material y cliente
   const [materialSeleccionado, setMaterialSeleccionado] = useState<string>("");
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string>("");
@@ -96,6 +97,24 @@ function VentaForm() {
     loadMateriales();
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (isConnected && !isWaiting) {
+        setIsWaiting(true);
+        try {
+          if (port) {
+            await readData(port);
+          }
+        } catch (error) {
+          console.error("Error al pesar:", error);
+        } finally {
+          setIsWaiting(false);
+        }
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isConnected, isWaiting, port, readData]);
 
   const handleProcessVenta = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -294,25 +313,6 @@ function VentaForm() {
             readOnly
             className="pr-2"
           />
-          <Button
-            color="primary"
-            variant="ghost"
-            onClick={async () => {
-              try {
-                setOutput("");
-                if (port) {
-                  await readData(port);
-                }
-              } catch (error) {
-                console.error("Error al pesar:", error);
-              }
-            }}
-            className="disabled:cursor-not-allowed disabled:opacity-70"
-            disabled={!isConnected}
-            type="button"
-          >
-            Pesar
-          </Button>
         </div>
       </div>
 

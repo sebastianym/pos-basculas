@@ -12,14 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (decoded.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "No tienes permisos para acceder a este recurso" },
-        { status: 403 }
-      );
-    }
-
-    const { nombre, direccion, telefono, NIT, ciudad, pais, numeroDeTiquete } =
+    const { numeroDeTiquete } =
       await request.json();
 
     const updateEmpresa = await prisma.empresa.update({
@@ -27,13 +20,7 @@ export async function POST(request: Request) {
         id: 1,
       },
       data: {
-        nombre,
-        direccion,
-        telefono,
-        NIT,
-        ciudad,
-        pais,
-        numeroDeTiquete: parseInt(numeroDeTiquete),
+        numeroDeTiquete
       },
     });
 
