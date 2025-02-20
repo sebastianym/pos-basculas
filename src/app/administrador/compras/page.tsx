@@ -38,15 +38,6 @@ function TablaCompras() {
     loadCompras();
   }, []);
 
-  // Funciones para actualizar y eliminar (actualmente solo loguean)
-  const handleActualizar = (id: number) => {
-    console.log(`Actualizar registro con ID: ${id}`);
-  };
-
-  const handleEliminar = (id: number) => {
-    console.log(`Eliminar registro con ID: ${id}`);
-  };
-
   // Filtrar compras según los criterios ingresados
   const filteredCompras = compras.filter((compra: any) => {
     // Filtrar por material (nombre)
@@ -196,7 +187,6 @@ function TablaCompras() {
                 <TableHead>Fecha</TableHead>
                 <TableHead>Hora</TableHead>
                 <TableHead>Valor</TableHead>
-                <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -217,26 +207,6 @@ function TablaCompras() {
                         style: "currency",
                         currency: "COP",
                       })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleActualizar(compra.id)}
-                          className="px-2 py-1 text-xs"
-                        >
-                          Actualizar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleEliminar(compra.id)}
-                          className="px-2 py-1 text-xs"
-                        >
-                          Eliminar
-                        </Button>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))

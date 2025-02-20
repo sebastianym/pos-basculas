@@ -122,7 +122,7 @@ function CompraForm() {
           setIsWaiting(false);
         }
       }
-    }, 5000);
+    }, 2500);
     return () => clearInterval(interval);
   }, [isConnected, isWaiting, port, readData]);
 
