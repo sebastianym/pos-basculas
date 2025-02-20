@@ -123,7 +123,7 @@ export async function printTicketCompra(
     const ticket = `${header}\n\n${detalleCompras}\n${footer}`;
     // Enviar comando para reiniciar y seleccionar la tabla de caracteres adecuada (ejemplo: \x1B\x74\x10)
     const initCmd = "\x1B\x40" + "\x1B\x74\x10";
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = [
       initCmd,
       ticket + "\n\x1B\x64\x05\x1D\x56\x01", // Avanza líneas y corte
@@ -174,7 +174,7 @@ export async function printTicketServicio(
     const ticket = `${header}\n\n${removeAccents(
       "DETALLE DE SERVICIO\n\n"
     )}${detalleVentas}\n${footer}`;
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = ["\x1B\x40", ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
 
     await qz.print(config, data);
@@ -243,7 +243,7 @@ export async function printTicketVenta(
     const ticket = `${header}\n\n${detalleVentas}\n${footer}`;
     // Comando de inicio para reiniciar la impresora y establecer la tabla de caracteres adecuada
     const initCmd = "\x1B\x40" + "\x1B\x74\x10";
-    const config = qz.configs.create("pos-80250");
+    const config = qz.configs.create("POS-58");
     const data = [initCmd, ticket + "\n\x1B\x64\x05\x1D\x56\x01"];
 
     await qz.print(config, data);
