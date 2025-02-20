@@ -97,6 +97,7 @@ export async function printTicketCompra(
       // Segunda línea: ítem, peso, rechazo y valor
       const pesoCol = compra.peso.toString().padStart(10, " ");
       const rechazoCol = compra.rechazo.toString().padStart(12, " ");
+      const precioPerKg = Number(compra.precioPorKg);
       const precio = Number(compra.precioTotal);
       total += precio;
       const precioCol =
@@ -106,7 +107,7 @@ export async function printTicketCompra(
           .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
           .padStart(10, " ");
 
-      detalleCompras += materialDesc + "\n";
+      detalleCompras += materialDesc + "  c/u: " + precioPerKg + "\n";
       detalleCompras += itemIndex + pesoCol + rechazoCol + precioCol + "\n";
     });
 
@@ -217,6 +218,7 @@ export async function printTicketVenta(
       const materialDesc = removeAccents("         " + venta.material);
       const pesoCol = venta.peso.toString().padStart(10, " ");
       const rechazoCol = venta.rechazo.toString().padStart(12, " ");
+      const precioPerKg = Number(venta.precioPorKg);
       const precio = Number(venta.precioTotal);
       total += precio;
       const precioCol =
@@ -226,7 +228,7 @@ export async function printTicketVenta(
           .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
           .padStart(10, " ");
 
-      detalleVentas += materialDesc + "\n";
+      detalleVentas += materialDesc + "  c/u: " + precioPerKg + "\n";
       detalleVentas += itemIndex + pesoCol + rechazoCol + precioCol + "\n";
     });
 
