@@ -17,9 +17,11 @@ import { confirmAlert, errorAlert } from "@/lib/alerts/alerts";
 import CreateUserModal from "@/components/modals/usuarios/createUserModal";
 import UpdateUserModal from "@/components/modals/usuarios/updateUserModal";
 import { CircularProgress } from "@nextui-org/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function TablaUsuarios() {
-  const [usuarios, setUsuarios] = useState<any>([]);
+  const [usuariosActivos, setUsuariosActivos] = useState<any>([]);
+  const [usuariosNoActivos, setUsuariosNoActivos] = useState<any>([]);
   const [updateTable, setUpdateTable] = useState(false);
   const [isModalCreateOpen, setModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setModalUpdateOpen] = useState(false);
@@ -31,7 +33,10 @@ function TablaUsuarios() {
       url: "/api/usuarios/all",
       error: "Error al obtener los usuarios",
     });
-    setUsuarios(data);
+    const usuariosActivos = data.filter((usuario: any) => usuario.activo);
+    const usuariosNoActivos = data.filter((usuario: any) => !usuario.activo);
+    setUsuariosActivos(usuariosActivos);
+    setUsuariosNoActivos(usuariosNoActivos);
     setLoading(false);
   }
 
@@ -43,7 +48,7 @@ function TablaUsuarios() {
     const data = await fetchPOST({
       url: "/api/usuarios/delete",
       body: { id },
-      error: "Error al eliminar el capítulo",
+      error: "Error al eliminar el usuario",
     });
     if (data.id) {
       setUpdateTable(!updateTable);
@@ -79,7 +84,7 @@ function TablaUsuarios() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col items-center w-full">
       <CreateUserModal
         handleModalClose={handleModalCreateClose}
         isModalOpen={isModalCreateOpen}
@@ -93,9 +98,10 @@ function TablaUsuarios() {
         updateTable={updateTable}
         setUpdateTable={setUpdateTable}
       />
-      <div className="flex flex-col items-center">
-        <div className="flex items-center justify-evenly space-y-2 max-w-4xl">
-          <h1 className="text-3xl font-bold m-8 text-center text-[#1a47b8]">
+
+      <div className="flex flex-col w-3/4 items-center space-y-2">
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-3xl font-bold my-5 text-center text-[#1a47b8]">
             Tabla de Usuarios
           </h1>
           <Button
@@ -107,68 +113,137 @@ function TablaUsuarios() {
             + Crear usuario
           </Button>
         </div>
-        <div className="w-full max-w-4xl border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Apellido</TableHead>
-                <TableHead>Identificador</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usuarios && usuarios.length > 0 ? (
-                usuarios.map((usuario: any) => (
-                  <TableRow key={usuario.id}>
-                    <TableCell>{usuario.nombre}</TableCell>
-                    <TableCell>{usuario.apellido}</TableCell>
-                    <TableCell>{usuario.identificador}</TableCell>
-                    <TableCell>
-                      <div className="flex justify-start space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setUsuarioSelected(usuario);
-                            handleModalUpdateOpen();
-                          }}
-                          className="px-2 py-1 text-xs"
-                        >
-                          Actualizar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={async () => {
-                            const responseSubmit = confirmAlert(
-                              "Eliminar usuario",
-                              "¿Estás seguro de eliminar este usuario?, se eliminaran las ventas y compras asociadas al usuario"
-                            );
-                            responseSubmit.then((confirmed) => {
-                              if (confirmed) {
-                                handleEliminar(usuario.id.toString());
-                              }
-                            });
-                          }}
-                          className="px-2 py-1 text-xs"
-                        >
-                          Eliminar
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center">
-                    No hay usuarios
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+
+        <Tabs
+          defaultValue="active"
+          className="w-full flex-col items-center justify-center"
+        >
+          <TabsList>
+            <TabsTrigger value="active">Usuarios activos</TabsTrigger>
+            <TabsTrigger value="no-active">Usuarios desactivados</TabsTrigger>
+          </TabsList>
+          <TabsContent value="active">
+            <div className="flex flex-col items-center">
+              <div className="w-full border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Apellido</TableHead>
+                      <TableHead>Identificador</TableHead>
+                      <TableHead>Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {usuariosActivos && usuariosActivos.length > 0 ? (
+                      usuariosActivos.map((usuario: any) => (
+                        <TableRow key={usuario.id}>
+                          <TableCell>{usuario.nombre}</TableCell>
+                          <TableCell>{usuario.apellido}</TableCell>
+                          <TableCell>{usuario.identificador}</TableCell>
+                          <TableCell>
+                            <div className="flex justify-start space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setUsuarioSelected(usuario);
+                                  handleModalUpdateOpen();
+                                }}
+                                className="px-2 py-1 text-xs"
+                              >
+                                Actualizar
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={async () => {
+                                  const responseSubmit = confirmAlert(
+                                    "Desactivar usuario",
+                                    "¿Estás seguro de desactivar este usuario?, no podrá acceder al sistema"
+                                  );
+                                  responseSubmit.then((confirmed) => {
+                                    if (confirmed) {
+                                      handleEliminar(usuario.id.toString());
+                                    }
+                                  });
+                                }}
+                                className="px-2 py-1 text-xs"
+                              >
+                                Desactivar
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                          No hay usuarios activos registrados
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="no-active">
+            <div className="flex flex-col items-center">
+              <div className="w-full border rounded-lg shadow-lg overflow-hidden bg-white px-4 py-1">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Apellido</TableHead>
+                      <TableHead>Identificador</TableHead>
+                      <TableHead>Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {usuariosNoActivos && usuariosNoActivos.length > 0 ? (
+                      usuariosNoActivos.map((usuario: any) => (
+                        <TableRow key={usuario.id}>
+                          <TableCell>{usuario.nombre}</TableCell>
+                          <TableCell>{usuario.apellido}</TableCell>
+                          <TableCell>{usuario.identificador}</TableCell>
+                          <TableCell>
+                            <div className="flex justify-start space-x-2">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={async () => {
+                                  const responseSubmit = confirmAlert(
+                                    "Activar usuario",
+                                    "¿Estás seguro de activar este usuario?"
+                                  );
+                                  responseSubmit.then((confirmed) => {
+                                    if (confirmed) {
+                                      handleEliminar(usuario.id.toString());
+                                    }
+                                  });
+                                }}
+                                className="px-2 py-1 text-xs bg-green-600"
+                              >
+                                Activar
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                          No hay usuarios desactivados registrados
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -12,20 +12,40 @@ export default async function createUserAction(
       apellido: formData.get("apellido"),
       identificador: formData.get("identificador"),
       contrasena: formData.get("contrasena"),
+      confirmarContrasena: formData.get("confirmarContrasena"),
     });
+
+    console.log("validatedFields", validatedFields.data);
 
     if (
       !validatedFields.success ||
       !validatedFields.data.nombre ||
       !validatedFields.data.apellido ||
       !validatedFields.data.identificador ||
-      !validatedFields.data.contrasena
+      !validatedFields.data.contrasena ||
+      !validatedFields.data.confirmarContrasena
     ) {
       return {
         ...prevState,
         apiErrors: null,
         zodErrors: validatedFields.error?.flatten().fieldErrors,
         message: "Faltan campos por completar.",
+      };
+    }
+
+    if (
+      validatedFields.data.contrasena !==
+      validatedFields.data.confirmarContrasena
+    ) {
+      return {
+        ...prevState,
+        apiErrors: null,
+        zodErrors: {
+          passwordConfirmation: [
+            "La confirmación de la contraseña no coincide con la contraseña.",
+          ],
+        },
+        message: "Las contraseñas no coinciden.",
       };
     }
 
@@ -37,7 +57,7 @@ export default async function createUserAction(
 
     // Si la API responde con un error (por ejemplo, NIT duplicado) lo devolvemos
     if (responseData?.error) {
-      return {success: false, message: responseData.error};
+      return { success: false, message: responseData.error };
     }
 
     if (!responseData) {
@@ -57,7 +77,12 @@ export default async function createUserAction(
       };
     }
 
-    return { success: true };
+    return {
+      ...prevState,
+      apiErrors: null,
+      zodErrors: null,
+      message: "Usuario creado correctamente",
+    };
   } catch (error) {
     console.error("Error al crear el usuario:", error);
     throw error;

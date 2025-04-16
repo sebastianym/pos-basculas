@@ -47,7 +47,8 @@ function UpdateUserModal({
   }, [usuario]);
 
   useEffect(() => {
-    if (formState.success) {
+    console.log(formState);
+    if (formState.message === "Usuario actualizado correctamente") {
       setUpdateTable(!updateTable);
       successAlert(
         "Éxito",
@@ -75,7 +76,7 @@ function UpdateUserModal({
                 <div className="mb-5">
                   <label htmlFor="nombre">
                     <p className="block text-sm font-semibold leading-[18px] text-gray-600 mb-2">
-                      Nombre:
+                      Nombre
                     </p>
                   </label>
                   <input
@@ -94,7 +95,7 @@ function UpdateUserModal({
                 <div className="mb-5">
                   <label htmlFor="apellido">
                     <p className="block text-sm font-semibold leading-[18px] text-gray-600 mb-2">
-                      Apellido:
+                      Apellido
                     </p>
                   </label>
                   <input
@@ -108,6 +109,22 @@ function UpdateUserModal({
                     className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
                   />
                   <ZodErrors error={formState?.zodErrors?.apellido} />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="contrasena">
+                    <p className="block text-sm font-semibold leading-[18px] text-gray-600 mb-2">
+                      Actualizar Contraseña (opcional)
+                    </p>
+                  </label>
+                  <input
+                    type="text"
+                    id="contrasena"
+                    name="contrasena"
+                    placeholder="Ingresa la contraseña del usuario"
+                    className="w-full min-w-0 rounded-md text-black bg-transparent border border-gray-200 placeholder-gray-500 focus:outline-none relative z-10 focus:border-pink-400 text-base leading-6 px-3 py-2.5"
+                  />
+                  <ZodErrors error={formState?.zodErrors?.contrasena} />
                 </div>
 
                 <div className="mt-5 transition-all flex justify-between">

@@ -11,7 +11,9 @@ export default async function updateUserAction(
       id: formData.get("id"),
       nombre: formData.get("nombre"),
       apellido: formData.get("apellido"),
+      contrasena: formData.get("contrasena"),
     });
+
     if (
       !validatedFields.success ||
       !validatedFields.data.nombre ||
@@ -21,6 +23,20 @@ export default async function updateUserAction(
         ...prevState,
         apiErrors: null,
         zodErrors: validatedFields.error?.flatten().fieldErrors,
+        message: "Faltan campos por completar.",
+      };
+    }
+    console.log(validatedFields.data);
+    if (
+      validatedFields.data.contrasena &&
+      validatedFields.data.contrasena.length < 6
+    ) {
+      return {
+        ...prevState,
+        apiErrors: null,
+        zodErrors: {
+          contrasena: ["La contraseña debe tener al menos 6 caracteres"],
+        },
         message: "Faltan campos por completar.",
       };
     }
@@ -48,7 +64,12 @@ export default async function updateUserAction(
       };
     }
 
-    return { success: true };
+    return {
+      ...prevState,
+      apiErrors: null,
+      zodErrors: null,
+      message: "Usuario actualizado correctamente",
+    };
   } catch (error) {
     console.error("Error al actualizar el usuario:", error);
     throw error;

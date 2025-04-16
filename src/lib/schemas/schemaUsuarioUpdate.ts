@@ -22,4 +22,9 @@ export const schemaUsuarioUpdate = z.object({
     .max(255, {
       message: "El apellido del usuario debe tener como máximo 255 caracteres",
     }),
+  contrasena: z
+    .string({
+      message: "La contraseña del usuario es requerida",
+    })
+    .optional(),
 });

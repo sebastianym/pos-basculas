@@ -8,14 +8,16 @@ datasource db {
 }
 
 model Usuario {
-  id            Int      @id @default(autoincrement())
-  nombre        String
-  apellido      String
-  identificador String   @unique
-  contrasena    String
-  rol           Rol
-  ventas        Venta[]
-  compras       Compra[]
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  apellido        String
+  identificador   String   @unique
+  contrasena      String
+  rol             Rol
+  activo          Boolean  @default(true)
+  funcionalidades String[]
+  ventas          Venta[]
+  compras         Compra[]
 }
 
 enum Rol {
@@ -53,6 +55,7 @@ model Material {
 
 model Venta {
   id                Int              @id @default(autoincrement())
+  numeroDeTiquete   Int              @default(0)
   valorVenta        Float
   fecha             DateTime
   hora              DateTime
@@ -65,16 +68,17 @@ model Venta {
 }
 
 model Compra {
-  id          Int       @id @default(autoincrement())
-  valorCompra Float
-  fecha       DateTime
-  hora        DateTime
-  material    Material  @relation(fields: [materialId], references: [id])
-  materialId  Int
-  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId   Int
-  proveedor   Proveedor @relation(fields: [proveedorId], references: [id])
-  proveedorId Int
+  id              Int       @id @default(autoincrement())
+  numeroDeTiquete Int       @default(0)
+  valorCompra     Float
+  fecha           DateTime
+  hora            DateTime
+  material        Material  @relation(fields: [materialId], references: [id])
+  materialId      Int
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId       Int
+  proveedor       Proveedor @relation(fields: [proveedorId], references: [id])
+  proveedorId     Int
 }
 
 model Empresa {

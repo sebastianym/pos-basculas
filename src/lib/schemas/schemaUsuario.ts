@@ -39,4 +39,10 @@ export const schemaUsuario = z.object({
     .min(6, {
       message: "La contraseña del usuario debe tener al menos 6 caracteres",
     }),
+  confirmarContrasena: z
+    .string({ message: "La confirmación de la contraseña es requerida" })
+    .min(6, {
+      message:
+        "La confirmación de la contraseña debe tener al menos 6 caracteres",
+    }),
 });
